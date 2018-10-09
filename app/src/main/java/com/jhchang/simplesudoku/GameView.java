@@ -24,6 +24,7 @@ public class GameView extends SurfaceView implements Runnable {
     volatile boolean playing;
     private Thread gameThread = null;
     private SceneManager sceneManager;
+    private Sudoku sudokuGen;
 
     private Paint paint;
     private Canvas canvas;
@@ -118,7 +119,24 @@ public class GameView extends SurfaceView implements Runnable {
     }
     private void generateBoard(String msg){
         int[] square = new int[4]; //input value 0-8, fixed num value 0-1, select value 0-1, highlight value 0-1
+        int boardSize = msg.length();
 
+
+        sudokuGen = new Sudoku(boardSize,0);
+
+        int[][] tempMat = sudokuGen.getMat();
+
+        currBoard.clear();
+        for(int y = 0;y<boardSize;y++){
+            for(int x = 0;x<boardSize;x++){
+                square[0] = tempMat[x][y];
+                square[1] = 0; //temp
+                square[2] = 0; //temp
+                square[3] = 0; //temp
+                currBoard.add(square);
+            }
+        }
+        sudokuGen.printSudoku();
 
         /*
 
@@ -128,6 +146,10 @@ public class GameView extends SurfaceView implements Runnable {
 
          */
 
+
+
+
+        /* You can use this to check if board complete or board errors, but for now, it's no good for generating
         //Start with creating a fully completed board first
         ArrayList<Integer> tempBoard=new ArrayList<Integer>();
         int boardSize = msg.length();
@@ -231,6 +253,7 @@ public class GameView extends SurfaceView implements Runnable {
             int[] tempL = {tempBoard.get(i),0,0,0};
             currBoard.add(tempL);
         }
+        */
 
     }
 
@@ -275,6 +298,7 @@ public class GameView extends SurfaceView implements Runnable {
                 case 3:
                     //3 to -1 is scene text
                     generateBoard("DISMANTLE");
+
                     dProg = 5; //EDIT THIS OUT LATER
                     dprogFlag = false;
                 case 2:
@@ -349,9 +373,13 @@ public class GameView extends SurfaceView implements Runnable {
                         ySpace+=2;
                         break;
                 }
+
+                paint.setColor(secColor);
                 int tempX = bCoords[0]+xSpace+boxSize*x;
                 int tempY = bCoords[1]+ySpace+boxSize*y;
                 c.drawRect(tempX,tempY,tempX+boxSize,tempY+boxSize,paint);
+
+                paint.setColor(priColor);
                 int[] targetPos = currBoard.get(x+(y*boardSize));
                 c.drawText(msg.substring(targetPos[0]), tempX, tempY,paint);
                 /* basic grid with no variation
