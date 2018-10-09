@@ -12,6 +12,7 @@ public class Sudoku
     private int N; // number of columns/rows.
     private int SRN; // square root of N
     private int K; // No. Of missing digits
+    private int difficulty;
 
     // Constructor
     Sudoku(int N, int K)
@@ -183,6 +184,33 @@ public class Sudoku
                 mat[i][j] = 0;
             }
         }
+    }
+
+    private void removeDigits(){
+        int remLim = 0;
+        switch(difficulty){
+            case 0: // very easy
+                remLim = Math.round((N*N)/3);
+                break;
+            case 1: // easy
+                remLim = Math.round((N*N)/2);
+                break;
+            case 2: // med
+                remLim = Math.round(5*(N*N)/8);
+                break;
+            case 3: // hard
+                remLim = Math.round(2*(N*N)/3);
+                break;
+            case 4: // very hard
+                remLim = Math.round(4*(N*N)/7);
+                break;
+        }
+        remLim = remLim - randomGenerator(Math.round(N/2));
+
+        if(N*N - remLim <= N){
+            remLim = N+1;
+        }
+
     }
 
     // Print sudoku
