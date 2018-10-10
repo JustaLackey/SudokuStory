@@ -32,21 +32,22 @@ public class GameView extends SurfaceView implements Runnable {
 
     private boolean dprogFlag, bsFlag;
     //a screenX holder
-    int screenX, screenY, level, bgColor,fontColor, dProg, currScene, boxSize;
+    private int screenX, screenY, level, bgColor,fontColor, dProg, currScene, boxSize;
     //int fTimer1, fTimer2, fTimer3, fTimer4, dTimer1, dTimer2, dTimer3, dTimer4;
-    int[] fTimer = new int[5];
-    int[] dTimer = new int[5];;
-    int[] bsTimer = new int [9];
-    int[] targetX = new int[9];
-    int[] targetY = new int[9];
+    private int[] fTimer = new int[5];
+    private int[] dTimer = new int[5];;
+    private int[] bsTimer = new int [9];
+    private int[] targetX = new int[9];
+    private int[] targetY = new int[9];
     //context to be used in onTouchEvent to cause the activity transition from GameAvtivity to MainActivity.
-    Context context;
+    private Context context;
     //board dimensions
-    int[] boardNine=new int[4];
-    int[] boardSix=new int[4];
-    int[] boardFour=new int[4];
+    private int[] boardNine=new int[4];
+    private int[] boardSix=new int[4];
+    private int[] boardFour=new int[4];
     //board
-    ArrayList<int[]> currBoard=new ArrayList<int[]>();
+    //ArrayList<int[]> currBoard=new ArrayList<int[]>();
+    private Cell[][] currBoard;
     ArrayList<int[]> candList=new ArrayList<int[]>();
     int[] squareSelect = new int[2];
 
@@ -96,7 +97,7 @@ public class GameView extends SurfaceView implements Runnable {
             dTimer[i] = 0;
         }
         //dProg = 0; //init should be 0
-        dProg = 3;
+        dProg = -2;
         currScene = 0;
     }
     private void initValues(){  //This should account for all screen sizes
@@ -121,7 +122,7 @@ public class GameView extends SurfaceView implements Runnable {
         boardNine[2] = boardNine[0] + (48+boxSize*9);
         boardNine[3] = boardNine[1] + (48+boxSize*9);
     }
-    private void generateBoard(String msg, int diff){
+    private Cell[][] generateBoard(String msg, int diff){
         int[] square = new int[4]; //input value 0-8, fixed num value 0-1, select value 0-1, highlight value 0-1
         int boardSize = msg.length();
         //int boardSize = 4;
@@ -129,15 +130,27 @@ public class GameView extends SurfaceView implements Runnable {
 
         sudokuGen = new Sudoku(boardSize, diff);
 
-        Cell[][] tempBoard = sudokuGen.getBoard();
-
+        return sudokuGen.getBoard();
+        /* using squares
+        //currBoard.clear();
         for(int y = 0;y<boardSize;y++){
             for(int x = 0;x<boardSize;x++){
+                square[0] = tempBoard[x][y].getNum();
+                if(tempBoard[x][y].getNum() > 0){
+                    square[1] = 1;
+                }else{
+                    square[1] = 0;
+                }
+                square[2] = 0;
+                square[3] = 0;
+                currBoard.add(square);
                 System.out.print(tempBoard[x][y].getNum()+"  ");
             }
             System.out.println();
             System.out.println();
         }
+
+                */
         /*
         int[][] tempMat = sudokuGen.getMat();
 
@@ -312,7 +325,7 @@ public class GameView extends SurfaceView implements Runnable {
                     break;
                 case 3:
                     //3 to -1 is scene text
-                    generateBoard("DISMANTLE", HARD_BOARD);
+
 
                     dProg = 5; //EDIT THIS OUT LATER
                     dprogFlag = false;
@@ -326,6 +339,12 @@ public class GameView extends SurfaceView implements Runnable {
                             posTop, 0,"none", fasterText, medFont);
                     break;
                 case -1:
+                    dprogFlag = false;
+                    break;
+
+                case -2: //dev flag? edit this later
+                    currBoard = generateBoard("DISMANTLE", HARD_BOARD);
+                    dProg = 5;
                     dprogFlag = false;
                     break;
             }
@@ -394,10 +413,19 @@ public class GameView extends SurfaceView implements Runnable {
                 int tempY = bCoords[1]+ySpace+boxSize*y;
                 c.drawRect(tempX,tempY,tempX+boxSize,tempY+boxSize,paint);
 
-                /* draw nums from board, still testing
+                // draw nums from board, still testing
+
                 paint.setColor(priColor);
-                int[] targetPos = currBoard.get(x+(y*boardSize));
-                c.drawText(msg.substring(targetPos[0]), tempX, tempY,paint);
+                paint.setTextSize(medFont);
+                int squareVal = currBoard[x][y].getNum();
+                if(squareVal > 0){
+                    String tempMsg =  String.valueOf(msg.charAt(squareVal - 1));
+                    c.drawText(tempMsg,tempX,tempY+boxSize,paint);
+                }
+                /* using squares and arraylist
+                int[] currSquare = currBoard.get(x+(y*boardSize));
+                int pos = currSquare[0];
+                c.drawText(msg.substring(pos,1), tempX, tempY+boxSize,paint);
                 */
 
                 /* basic grid with no variation
@@ -523,7 +551,7 @@ public class GameView extends SurfaceView implements Runnable {
         switch (motionEvent.getAction() & MotionEvent.ACTION_MASK) {
             case MotionEvent.ACTION_DOWN:
                 if(touchY > screenY/2 + bigFont & touchY < screenY/2 - bigFont){
-                    dProg = -1;
+                    dProg = 3; //edit this make sure it's good
                     dprogFlag = false;
                 }
                 break;
