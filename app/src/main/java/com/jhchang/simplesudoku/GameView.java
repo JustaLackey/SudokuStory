@@ -50,20 +50,24 @@ public class GameView extends SurfaceView implements Runnable {
     ArrayList<int[]> candList=new ArrayList<int[]>();
     int[] squareSelect = new int[2];
 
-    final int smallFont = 32;
-    final int medFont = 64;
-    final int bigFont = 100;
+    private final int smallFont = 32;
+    private final int medFont = 64;
+    private final int bigFont = 100;
 
-    final int posTop = 0;
-    final int posTopMid = 1;
-    final int posMid = 2;
-    final int posBotMid = 3;
-    final int posBot = 4;
+    private final int posTop = 0;
+    private final int posTopMid = 1;
+    private final int posMid = 2;
+    private final int posBotMid = 3;
+    private final int posBot = 4;
 
-    final int fasterText = 3;
-    final int fastText = 6;
-    final int normText = 24;
-    final int slowText = 58;
+    private final int fasterText = 3;
+    private final int fastText = 6;
+    private final int normText = 24;
+    private final int slowText = 58;
+
+    private final int EASY_BOARD = 0;
+    private final int MED_BOARD = 1;
+    private final int HARD_BOARD = 2;
 
     public GameView(Context context, int screenX, int screenY) {
         super(context);
@@ -117,13 +121,24 @@ public class GameView extends SurfaceView implements Runnable {
         boardNine[2] = boardNine[0] + (48+boxSize*9);
         boardNine[3] = boardNine[1] + (48+boxSize*9);
     }
-    private void generateBoard(String msg){
+    private void generateBoard(String msg, int diff){
         int[] square = new int[4]; //input value 0-8, fixed num value 0-1, select value 0-1, highlight value 0-1
         int boardSize = msg.length();
+        //int boardSize = 4;
 
 
-        sudokuGen = new Sudoku(boardSize,0);
+        sudokuGen = new Sudoku(boardSize, diff);
 
+        Cell[][] tempBoard = sudokuGen.getBoard();
+
+        for(int y = 0;y<boardSize;y++){
+            for(int x = 0;x<boardSize;x++){
+                System.out.print(tempBoard[x][y].getNum()+"  ");
+            }
+            System.out.println();
+            System.out.println();
+        }
+        /*
         int[][] tempMat = sudokuGen.getMat();
 
         currBoard.clear();
@@ -137,7 +152,7 @@ public class GameView extends SurfaceView implements Runnable {
             }
         }
         sudokuGen.printSudoku();
-
+        */
         /*
 
         CURRENT PROBLEM WITH THIS SHIT IS THAT I ACTUALLY NEED TO SOLVE THE SUDOKU BOARD IN ORDER TO GENERATE IT, SO THIS IS PRETTY MUCH ALL TRASH??
@@ -297,7 +312,7 @@ public class GameView extends SurfaceView implements Runnable {
                     break;
                 case 3:
                     //3 to -1 is scene text
-                    generateBoard("DISMANTLE");
+                    generateBoard("DISMANTLE", HARD_BOARD);
 
                     dProg = 5; //EDIT THIS OUT LATER
                     dprogFlag = false;
@@ -379,9 +394,12 @@ public class GameView extends SurfaceView implements Runnable {
                 int tempY = bCoords[1]+ySpace+boxSize*y;
                 c.drawRect(tempX,tempY,tempX+boxSize,tempY+boxSize,paint);
 
+                /* draw nums from board, still testing
                 paint.setColor(priColor);
                 int[] targetPos = currBoard.get(x+(y*boardSize));
                 c.drawText(msg.substring(targetPos[0]), tempX, tempY,paint);
+                */
+
                 /* basic grid with no variation
                 int xCoord = startX+5+5*x+x*boxSize;
                 int yCoord = startY+5+5*y+y*boxSize;

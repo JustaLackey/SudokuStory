@@ -4,239 +4,411 @@ package com.jhchang.simplesudoku;
 /* Java program for Sudoku generator  */
 // NOTE, THIS ONLY WORKS WITH NUMBERS FACTORABLE BY THEMSELVES, 9x9, 4x4
 // does not work with 6x6
-import java.lang.*;
+
+import java.util.*;
+import static java.lang.System.*;
 
 public class Sudoku
 {
-    private int[] mat[];
-    private int N; // number of columns/rows.
-    private int SRN; // square root of N
-    private int K; // No. Of missing digits
-    private int difficulty;
+    private int difficulty = 40; // number of starting numbers, lower is harder, higher is easier
+    private final int chances = 10;
+    private final int startingClues = 81;
+    private Cell[][] board;
+    private boolean[][] tried;
+    private long startTime;
+    public Random rand;
+    public static int size, numberOfSolutions;
 
-    // Constructor
-    Sudoku(int N, int K)
+    /**
+     * Use this constructor to set the default size of board
+     */
+
+    /**
+     * Creates a new SodokuBoard based on given size used as a multiplier
+     *
+     * @param size values 1 through 4, 1 is the smallest, 4 is the largest
+     */
+    public Sudoku(int size, int diff)
     {
-        this.N = N;
-        this.K = K;
-
-        // Compute square root of N
-        Double SRNd = Math.sqrt(N);
-        SRN = SRNd.intValue();
-
-        mat = new int[N][N];
-        fillValues();
+        this.size = size;
+        if(diff > 1){
+            this.difficulty = Math.round(2*(size*size)/5);
+        }else if(diff > 0){
+            this.difficulty = Math.round((size*size)/2);
+        }else{
+            this.difficulty = Math.round(3*(size*size)/5);
+        }
+        rand = new Random();
+        createBoard();
     }
 
-    // Sudoku Generator
-    private void fillValues()
+
+    public void createCells()
     {
-        // Fill the diagonal of SRN x SRN matrices
-        fillDiagonal();
-
-        // Fill remaining blocks
-        fillRemaining(0, SRN);
-
-        // Remove Randomly K digits to make game - way too basic
-        //removeKDigits();
-    }
-
-    // Fill the diagonal SRN number of SRN x SRN matrices
-    private void fillDiagonal()
-    {
-
-        for (int i = 0; i<N; i=i+SRN)
-
-            // for diagonal box, start coordinates->i==j
-            fillBox(i, i);
-    }
-
-    // Returns false if given 3 x 3 block contains num.
-    private boolean unUsedInBox(int rowStart, int colStart, int num)
-    {
-        for (int i = 0; i<SRN; i++)
-            for (int j = 0; j<SRN; j++)
-                if (mat[rowStart+i][colStart+j]==num)
-                    return false;
-
-        return true;
-    }
-
-    // Fill a 3 x 3 matrix.
-    private void fillBox(int row,int col)
-    {
-        int num;
-        for (int i=0; i<SRN; i++)
-        {
-            for (int j=0; j<SRN; j++)
-            {
-                do
-                {
-                    num = randomGenerator(N);
-                }
-                while (!unUsedInBox(row, col, num));
-
-                mat[row+i][col+j] = num;
+        board = new Cell[size][size];
+        for (int i = 0; i < board.length; i++){
+            for (int j = 0; j < board[0].length; j++){
+                board[j][i] = new Cell(j,i);
+                //addition of different factors of the location:
+                //offset due to grid walls + current position (in array) + undo the image centering (done automatically by greenfoot)
             }
         }
     }
 
-    // Random generator
-    private int randomGenerator(int num)
+    /**
+     * Sudoku creation will be done in the order of these steps:
+     *
+     * 1. Assign values to each cell in the grid.
+     * 2. Set the images to each cell.
+     * 3. Remove images in groups, ensuring that the puzzle only has one solution
+     * 4. Puzzle is completed once 20-30 clues / images remain
+     */
+    public void createBoard()
     {
-        return (int) Math.floor((Math.random()*num+1));
+        do{
+            createCells();
+            setNums(0,0);
+            startTime = System.nanoTime();
+            tried = new boolean[size][size];
+        }while(/*!removeNums(rand.nextInt(9), rand.nextInt(9), startingClues, chances, convertToMatrix())*/!removeNums());
     }
 
-    // Check if safe to put in cell
-    private boolean CheckIfSafe(int i,int j,int num)
+    /**
+     * Sets a blank grid of cells to numbers that follow sudoku rules using recursion.
+     *
+     * @param r current row
+     * @param c current column
+     */
+    public boolean setNums(int r, int c)
     {
-        return (unUsedInRow(i, num) &&
-                unUsedInCol(j, num) &&
-                unUsedInBox(i-i%SRN, j-j%SRN, num));
-    }
-
-    // check in the row for existence
-    private boolean unUsedInRow(int i,int num)
-    {
-        for (int j = 0; j<N; j++)
-            if (mat[i][j] == num)
-                return false;
-        return true;
-    }
-
-    // check in the row for existence
-    private boolean unUsedInCol(int j,int num)
-    {
-        for (int i = 0; i<N; i++)
-            if (mat[i][j] == num)
-                return false;
-        return true;
-    }
-
-    // A recursive function to fill remaining
-    // matrix
-    private boolean fillRemaining(int i, int j)
-    {
-        //  System.out.println(i+" "+j);
-        if (j>=N && i<N-1)
-        {
-            i = i + 1;
-            j = 0;
-        }
-        if (i>=N && j>=N)
+        if (r >= size)
             return true;
+        if (c >= size)
+            return setNums(r+1, 0);
 
-        if (i < SRN)
-        {
-            if (j < SRN)
-                j = SRN;
+        ArrayList<Integer> nums = new ArrayList<Integer>();
+        for(int i=0;i<size;i++){
+            nums.add(i+1);
         }
-        else if (i < N-SRN)
-        {
-            if (j==(int)(i/SRN)*SRN)
-                j =  j + SRN;
+        //ArrayList<Integer> nums = new ArrayList<Integer>(Arrays.asList(1,2,3,4,5,6,7,8,9));
+        int num = 0;
+        while (true){
+            board[r][c].setNum(0);
+            if (nums.isEmpty())
+                return false;
+            int index = rand.nextInt(nums.size());
+            num = nums.get(index);
+            nums.remove(index);
+            if (checkSquare(r, c, num) && checkRow(r, num) && checkColumn(c, num)){
+                board[r][c].setNum(num);
+                if ( setNums(r, c+1) )
+                    break;
+            }
         }
+        return true;
+    }
+
+    /**
+     * Converts to a matrix of integers first. Then removes a specific group of numbers based on the clue count.
+     * It checks that the removed numbers leave one unique solution. If it does, it also removes this from the board.
+     * If it doesn't work, it recreates the integer matrix and trys again.
+     */
+    public boolean removeNums()
+    {
+        int clueCount = size*size, r = 0, c = 0; //clue count only works with perfect squares, adjust for 6x6
+        int[][] b = convertToMatrix();
+        while (clueCount > difficulty){
+            while (true){
+                r = rand.nextInt(size);
+                c = rand.nextInt(size); //You may have to look into this more, this seems specific to 9x9
+                if(clueCount > 60){ //groups of 4
+                    if (r != (size-1) && c != (size-1) && b[r][c] != 0 && b[r][c+1] != 0 && b[r+1][c] != 0 && b[r+1][c+1] != 0){
+                        for (int i = 0; i < 2; i++){
+                            b[r][c+i] = 0;
+                            b[r+1][c+i] = 0;
+                        }
+                        break;
+                    }
+                }
+                else if (clueCount > 40){ //groups of 2
+                    if (c != (size-1) && b[r][c] != 0 && b[r][c+1] != 0){ //extends to the right
+                        for (int i = 0; i < 2; i++)
+                            b[r][c+i] = 0;
+                        break;
+                    }
+                    else if (r != (size-1) && b[r][c] != 0 && b[r+1][c] != 0){ //extends below
+                        for (int i = 0; i < 2; i++)
+                            b[r+i][c] = 0;
+                        break;
+                    }
+                }
+                else if (b[r][c] != 0){ //1 by 1
+                    b[r][c] = 0;
+                    break;
+                }
+            }
+
+            numberOfSolutions = 0;
+            try{
+                checkForOneSolution(0,0,b.clone());
+            }
+            catch(Exception e){
+                //System.out.println(e);
+            }
+
+            if (numberOfSolutions <= 1){
+                for(int i = 0; i < board.length; i++)
+                    for(int j = 0; j < board[i].length; j++)
+                        board[i][j].setNum(b[i][j]);
+                clueCount -= clueCount > 60 ? 4 : clueCount > 40 ? 2 : 1;
+            }
+            else
+                b = convertToMatrix();
+
+            if (System.nanoTime() - startTime > Math.pow(10, 9) * 5){ // break out of loop if 5 seconds pass
+                out.println("Failed to reduce puzzle. Reached a clue count of: " + clueCount);
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /**
+     *
+     */
+    public boolean removeNums(int r, int c, int clueCount, int remain, int[][] boardCopy)
+    {
+        if (remain <= 0)
+            return false;
+        if (tried[r][c])
+            return removeNums(rand.nextInt(size), rand.nextInt(size), clueCount, remain, boardCopy);
+        if (clueCount <= difficulty){
+            for(int i = 0; i < board.length; i++)
+                for(int j = 0; j < board[i].length; j++)
+                    board[i][j].setNum(boardCopy[i][j]);
+            return true;
+        }
+        int[][] b = boardCopy.clone();
+        boolean right = false;
+        if(clueCount > Math.round(2*(size*size)/3)){ //groups of 4
+            if (r != (size-1) && c != (size-1) && !tried[r][c+1] && !tried[r+1][c] && !tried[r+1][c+1]){
+                for (int i = 0; i < 2; i++){
+                    b[r][c+i] = 0;
+                    b[r+1][c+i] = 0;
+                    tried[r][c+i] = true;
+                    tried[r+1][c+i] = true;
+                }
+            }
+            else
+                return removeNums(rand.nextInt(size), rand.nextInt(size), clueCount, remain, boardCopy);
+        }
+        else if (clueCount > Math.round((size*size)/2)){ //groups of 2
+            if (c != (size-1) && !tried[r][c+1]){ //extends to the right
+                for (int i = 0; i < 2; i++){
+                    b[r][c+i] = 0;
+                    tried[r][c+1] = true;
+                }
+                right = true;
+            }
+            else if (r != (size-1) && !tried[r+1][c]){ //extends below
+                for (int i = 0; i < 2; i++){
+                    b[r+i][c] = 0;
+                    tried[r+i][c] = true;
+                }
+            }
+            else
+                return removeNums(rand.nextInt(size), rand.nextInt(size), clueCount, remain, boardCopy);
+        }
+        else{ //1 by 1
+            b[r][c] = 0;
+            tried[r][c] = true;
+        }
+
+        numberOfSolutions = 0;
+        try{
+            checkForOneSolution(0,0,b.clone());
+        }
+        catch(Exception e){
+            //System.out.println(e);
+        }
+        System.out.println("Sol: " + numberOfSolutions + " Clues: " + clueCount);
+        if (numberOfSolutions <= 1)
+            if (removeNums(rand.nextInt(size), rand.nextInt(size), clueCount - (clueCount > Math.round(2*(size*size)/3) ? 4 : clueCount > Math.round((size*size)/2) ? 2 : 1), chances, b))
+                return true;
+        //if this removal did not work currently or in the future, it will the execute the following code
+
+        if (clueCount > Math.round(2*(size*size)/3)){ //reset booleans that weren't tried back to normal
+            tried[r][c+1] = false;
+            tried[r+1][c] = false;
+            tried[r+1][c+1] = false;
+        }
+        else if (clueCount > Math.round((size*size)/2)){
+            if (right)
+                tried[r][c+1] = false;
+            else
+                tried[r+1][c] = false;
+        }
+        return removeNums(rand.nextInt(size), rand.nextInt(size), clueCount, --remain, boardCopy);
+    }
+
+    /**
+     * This method should check every possible combination of numbers to see if its a valid solution.
+     * It should finally return true when the first blank number it checked runs out of numbers to check.
+     *
+     * @param r current row
+     * @param c current column
+     * @param boardCopy the numbers remaining in a sudoku grid
+     */
+    public boolean checkForOneSolution(int r, int c, int[][] boardCopy) throws Exception
+    {
+        if (r >= size){
+            if (++numberOfSolutions > 1)
+                throw new Exception("Found more than one solution.");
+            return false;
+        }
+        if (c >= size)
+            return checkForOneSolution(r+1, 0, boardCopy);
+        if (boardCopy[r][c] != 0) //already has a valid number
+            return checkForOneSolution(r, c+1, boardCopy);
+        int num = 0;
+        while (true){
+            boardCopy[r][c] = 0;
+            num++;
+            if (num >= size+1) //no more numbers
+                return true;
+            if (checkSquare(r, c, num, boardCopy) && checkRow(r, num, boardCopy) && checkColumn(c, num, boardCopy)){
+                boardCopy[r][c] = num;
+                checkForOneSolution(r, c+1, boardCopy);
+            }
+        }
+    }
+
+    private int[][] convertToMatrix()
+    {
+        int[][] boardCopy = new int[board.length][board[0].length];
+        for (int i = 0; i < board.length; i++)
+            for (int j = 0; j < board[i].length; j++)
+                boardCopy[i][j] = board[i][j].getNum();
+        return boardCopy;
+    }
+
+    public boolean checkSquare(int r, int c, int num)
+    {
+        return checkSquare(r, c, num, convertToMatrix());
+    }
+
+    public boolean checkRow(int r, int num)
+    {
+        return checkRow(r, num, convertToMatrix());
+    }
+
+    public boolean checkColumn(int c, int num)
+    {
+        return checkColumn(c, num, convertToMatrix());
+    }
+
+    /**
+     * @param r the row of cell 0-8
+     * @param c the column of cell 0-8
+     * @param num the number its checking for 1-9
+     */
+    public boolean checkSquare(int r, int c, int num, int[][] boardCopy)
+    {
+
+        ArrayList<int[]> breakNine = new ArrayList<int[]>(); //break points for 9x9, though this is ugly, I think this faster than doing it with a loop
+        int[] nb = {3,3}; breakNine.add(nb); nb = new int[] {6,3}; breakNine.add(nb); nb = new int[] {9,3}; breakNine.add(nb);
+        nb = new int[] {3,6}; breakNine.add(nb); nb = new int[] {6,6}; breakNine.add(nb); nb = new int[] {9,6}; breakNine.add(nb);
+        nb = new int[] {3,9}; breakNine.add(nb); nb = new int[] {6,9}; breakNine.add(nb); nb = new int[] {9,9}; breakNine.add(nb);
+        int bWidth = 3;
+        int bHeight = 3;
+
+        ArrayList<int[]> breakSix = new ArrayList<int[]>(); //break points for 6x6
+        int[] sb = {3,2}; breakSix.add(sb); sb = new int[] {6,2}; breakSix.add(sb);
+        sb = new int[] {3,4}; breakSix.add(sb);sb = new int[] {6,4}; breakSix.add(sb);
+        sb = new int[] {3,6}; breakSix.add(sb);sb = new int[] {6,6}; breakSix.add(sb);
+
+        ArrayList<int[]> breakFour = new ArrayList<int[]>(); // break points for 4x4
+        int[] fb = {2,2}; breakFour.add(fb); fb = new int[] {4,2}; breakFour.add(fb);
+        fb = new int[] {2,4}; breakFour.add(fb); fb = new int[] {4,4}; breakFour.add(fb);
+
+        /*
+        if (r < 3)
+            r = 0;
+        else if (r < 6)
+            r = 3;
         else
-        {
-            if (j == N-SRN)
-            {
-                i = i + 1;
-                j = 0;
-                if (i>=N)
-                    return true;
+            r = 6;
+        if (c < 3)
+            c = 0;
+        else if (c < 6)
+            c = 3;
+        else
+            c = 6;
+        for (int i = r; i < r+3; i++){
+            for (int j = c; j < c+3; j++){
+                if (boardCopy[i][j] == num)
+                    return false;
             }
         }
-
-        for (int num = 1; num<=N; num++)
-        {
-            if (CheckIfSafe(i, j, num))
-            {
-                mat[i][j] = num;
-                if (fillRemaining(i, j+1))
-                    return true;
-
-                mat[i][j] = 0;
+        return true;
+        */
+        ArrayList<int[]> breakPoints;
+        int[] bPoint = new int[2];
+        if(size == 9){
+            breakPoints = breakNine;
+        }else if(size == 6){
+            breakPoints = breakSix;
+            bHeight = 2;
+        }else if(size == 4){
+            breakPoints = breakFour;
+            bWidth = 2;
+            bHeight = 2;
+        }else{
+            breakPoints = breakNine;
+        }
+        for(int b = 0;b<breakPoints.size();b++){
+            if(r< breakPoints.get(b)[0] & c< breakPoints.get(b)[1]){
+                bPoint = breakPoints.get(b);
+                //System.out.println("break, x: "+bPoint[0]+", y: "+bPoint[1]);
+                break;
             }
         }
-        return false;
-    }
-
-    // Remove the K no. of digits to
-    // complete game
-    private void removeKDigits()
-    {
-        int count = K;
-        while (count != 0)
-        {
-            int cellId = randomGenerator(N*N);
-
-            // System.out.println(cellId);
-            // extract coordinates i  and j
-            int i = (cellId/N);
-            int j = cellId%9;
-            if (j != 0)
-                j = j - 1;
-
-            // System.out.println(i+" "+j);
-            if (mat[i][j] != 0)
-            {
-                count--;
-                mat[i][j] = 0;
+        for(int xx = bPoint[0]-bWidth;xx<bPoint[0];xx++){
+            for(int yy = bPoint[1]-bHeight;yy<bPoint[1];yy++){
+                if (boardCopy[xx][yy] == num) {
+                    return false;
+                }
             }
         }
+        return true;
     }
 
-    private void removeDigits(){
-        int remLim = 0;
-        switch(difficulty){
-            case 0: // very easy
-                remLim = Math.round((N*N)/3);
-                break;
-            case 1: // easy
-                remLim = Math.round((N*N)/2);
-                break;
-            case 2: // med
-                remLim = Math.round(5*(N*N)/8);
-                break;
-            case 3: // hard
-                remLim = Math.round(2*(N*N)/3);
-                break;
-            case 4: // very hard
-                remLim = Math.round(4*(N*N)/7);
-                break;
-        }
-        remLim = remLim - randomGenerator(Math.round(N/2));
-
-        if(N*N - remLim <= N){
-            remLim = N+1;
-        }
-
-    }
-
-    // Print sudoku
-    public void printSudoku()
+    /**
+     * @param r the row of cell 0-8
+     * @param num the number its checking for 1-9
+     */
+    public boolean checkRow(int r, int num, int[][] boardCopy)
     {
-        for (int i = 0; i<N; i++)
-        {
-            for (int j = 0; j<N; j++)
-                System.out.print(mat[i][j] + " ");
-            System.out.println();
-        }
-        System.out.println();
+        for (int value : boardCopy[r])
+            if (value == num)
+                return false;
+        return true;
     }
 
-    public int[][] getMat() {
-        return mat;
-    }
-
-    // Driver code
-    /*
-    public static void main(String[] args)
+    /**
+     * @param c the column of cell 0-8
+     * @param num the number its checking for 1-9
+     */
+    public boolean checkColumn(int c, int num, int[][] boardCopy)
     {
-        int N = 9, K = 20;
-        Sudoku sudoku = new Sudoku(N, K);
-        sudoku.fillValues();
-        sudoku.printSudoku();
+        for (int[] row : boardCopy)
+            if (row[c] == num)
+                return false;
+        return true;
     }
-    */
+
+    public Cell[][] getBoard() {
+        return board;
+    }
+    //graphics based methods
 }
