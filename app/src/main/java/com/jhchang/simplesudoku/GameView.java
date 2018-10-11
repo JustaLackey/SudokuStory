@@ -72,6 +72,9 @@ public class GameView extends SurfaceView implements Runnable {
     private final int MED_BOARD = 1;
     private final int HARD_BOARD = 2;
 
+    private final int HIGHLIGHT_COLOR = Color.argb(255,0,0,255);
+    private final int NEIGHBOR_COLOR = Color.argb(255,200,200,200);
+
     public GameView(Context context, int screenX, int screenY) {
         super(context);
 
@@ -208,6 +211,9 @@ public class GameView extends SurfaceView implements Runnable {
     }
 
 
+    /*
+    LOTS OF THE SPACING IS OFF, FIX THIS WHEN YOU GET THE CHANCE
+     */
     private void drawBoard(Canvas c, String msg, int priColor, int secColor){
         int boardSize = msg.length();
         paint.setColor(priColor);
@@ -289,19 +295,33 @@ public class GameView extends SurfaceView implements Runnable {
                         ySpace+=2;
                         break;
                 }
-                paint.setColor(secColor);
+                int hit = 0;
+                if(activeTouch[0]==x & activeTouch[1]==y){
+                    hit = 1;
+                    paint.setColor(HIGHLIGHT_COLOR);
+                }else if(activeTouch[0]==x || activeTouch[1]==y) {
+                    hit = 2;
+                    paint.setColor(NEIGHBOR_COLOR);
+                }else{
+                    hit = 3;
+                    paint.setColor(secColor);
+                }
                 int tempX = bCoords[0]+xSpace+boxSize*x;
                 int tempY = bCoords[1]+ySpace+boxSize*y;
+                int color = paint.getColor();
                 c.drawRect(tempX,tempY,tempX+boxSize,tempY+boxSize,paint);
 
                 // draw nums from board, still testing
                 paint.setColor(priColor);
                 paint.setTextSize(medFont);
+                paint.setTextAlign(Paint.Align.CENTER);
                 int squareVal = currBoard[x][y].getNum();
                 if(squareVal > 0){
                     String tempMsg =  String.valueOf(msg.charAt(squareVal - 1));
-                    c.drawText(tempMsg,tempX,tempY+boxSize,paint);
+                    c.drawText(tempMsg,tempX+medFont/2,tempY+boxSize,paint);
                 }
+
+                paint.setTextAlign(Paint.Align.LEFT);
             }
         }
     }
@@ -397,7 +417,21 @@ public class GameView extends SurfaceView implements Runnable {
     }
 
     private void drawAvailNum(Canvas c, String msg, int priColor) {
-
+        int spaceX = 24;
+        int letterX = medFont;
+        int startX = screenX/2 - (letterX*msg.length()+spaceX*(msg.length()-1))/2;
+        if(startX < 0){ //this shouldn't happen?
+            startX = 24;
+            spaceX = 12;
+        }
+        int startY = Math.round(7*screenY/8);
+        paint.setTextAlign(Paint.Align.CENTER);
+        paint.setColor(priColor);
+        for(int i=0;i<msg.length();i++){
+            String tempMsg =  String.valueOf(msg.charAt(i));
+            c.drawText(tempMsg, startX+letterX*i+spaceX*i,startY,paint);
+        }
+        paint.setTextAlign(Paint.Align.LEFT);
     }
 
     private void dialogue(Canvas c, String msg, int pos, int timer, String effect, int textSpeed, int fontSize){
@@ -587,11 +621,12 @@ public class GameView extends SurfaceView implements Runnable {
     public boolean onTouchEvent(MotionEvent motionEvent) {
         int touchX = (int)motionEvent.getX();
         int touchY = (int)motionEvent.getY();
-        if(dProg < 3){
+        if(dProg <= 3){
             switch (motionEvent.getAction() & MotionEvent.ACTION_MASK) {
                 case MotionEvent.ACTION_DOWN:
-                    if(touchY > screenY/2 + bigFont & touchY < screenY/2 - bigFont){
-                        dProg = 5; //edit this make sure it's good
+                    System.out.println("touchY: "+touchY+ " screenY: "+screenY+" bigFont: "+bigFont);
+                    if(touchY < screenY/2 + bigFont & touchY > screenY/2 - bigFont){
+                        dProg = -2; //edit this make sure it's good
                         dprogFlag = false;
                     }
                     break;
@@ -606,6 +641,10 @@ public class GameView extends SurfaceView implements Runnable {
                 case MotionEvent.ACTION_DOWN:
                     pointerLoc(touchX,touchY);
                     break;
+                case MotionEvent.ACTION_MOVE:
+                    pointerLoc(touchX,touchY);
+                    break;
+
             }
         }
         return true;
