@@ -46,6 +46,8 @@ public class GameView extends SurfaceView implements Runnable {
     private int[] boardNine=new int[4];
     private int[] boardSix=new int[4];
     private int[] boardFour=new int[4];
+
+    private int[] bCoords = new int[4];
     //board
     //ArrayList<int[]> currBoard=new ArrayList<int[]>();
     private int board;
@@ -74,6 +76,8 @@ public class GameView extends SurfaceView implements Runnable {
 
     private final int HIGHLIGHT_COLOR = Color.argb(255,0,0,255);
     private final int NEIGHBOR_COLOR = Color.argb(255,200,200,200);
+    private final int FIXED_COLOR = Color.argb(255,50,50,50);
+    private final int ERROR_COLOR = Color.RED;
 
     public GameView(Context context, int screenX, int screenY) {
         super(context);
@@ -217,7 +221,6 @@ public class GameView extends SurfaceView implements Runnable {
     private void drawBoard(Canvas c, String msg, int priColor, int secColor){
         int boardSize = msg.length();
         paint.setColor(priColor);
-        int[] bCoords;
         switch(boardSize){
             case 9:
                 bCoords = boardNine;
@@ -296,14 +299,18 @@ public class GameView extends SurfaceView implements Runnable {
                         break;
                 }
                 int hit = 0;
+                boolean fixed = currBoard[x][y].getFixed();
                 if(activeTouch[0]==x & activeTouch[1]==y){
                     hit = 1;
                     paint.setColor(HIGHLIGHT_COLOR);
                 }else if(activeTouch[0]==x || activeTouch[1]==y) {
                     hit = 2;
                     paint.setColor(NEIGHBOR_COLOR);
-                }else{
+                }else if(currBoard[x][y].getFixed()) {
                     hit = 3;
+                    paint.setColor(FIXED_COLOR);
+                }else{
+                    hit = 4;
                     paint.setColor(secColor);
                 }
                 int tempX = bCoords[0]+xSpace+boxSize*x;
@@ -312,7 +319,13 @@ public class GameView extends SurfaceView implements Runnable {
                 c.drawRect(tempX,tempY,tempX+boxSize,tempY+boxSize,paint);
 
                 // draw nums from board, still testing
-                paint.setColor(priColor);
+                if(currBoard[x][y].getError()){
+                    paint.setColor(ERROR_COLOR);
+                    System.out.print("error color " + ERROR_COLOR);
+                }else{
+                    paint.setColor(priColor);
+                    System.out.print("normal color" + priColor);
+                }
                 paint.setTextSize(medFont);
                 paint.setTextAlign(Paint.Align.CENTER);
                 int squareVal = currBoard[x][y].getNum();
@@ -617,6 +630,124 @@ public class GameView extends SurfaceView implements Runnable {
         }
     }
 
+    private void selectLoc(int touchX,int touchY){
+
+        int spaceX = 24;
+        int letterX = medFont;
+        int startX = screenX/2 - (letterX*board+spaceX*(board-1))/2;
+        if(startX < 0){ //this shouldn't happen?
+            startX = 24;
+            spaceX = 12;
+        }
+        int startY = Math.round(7*screenY/8);
+        for(int i=0;i<board;i++){
+            if(touchX > startX+letterX*i+spaceX*i-Math.round(medFont/2) & touchX < startX+letterX*i+spaceX*i+Math.round(medFont/2)
+                    & touchY > startY - Math.round(medFont/2) & touchY < startY + Math.round(medFont/2)
+                    & !currBoard[activeTouch[0]][activeTouch[1]].getFixed()){
+                currBoard[activeTouch[0]][activeTouch[1]].setNum(i+1);
+                checkBoard();
+                break;
+            }
+
+        }
+    }
+
+    private void checkBoard(){
+        ArrayList<Integer> tempBoard=new ArrayList<Integer>();
+
+        //board break points
+        ArrayList<int[]> breakNine = new ArrayList<int[]>(); //break points for 9x9, though this is ugly, I think this faster than doing it with a loop
+        int[] nb = {3,3}; breakNine.add(nb); nb = new int[] {6,3}; breakNine.add(nb); nb = new int[] {9,3}; breakNine.add(nb);
+        nb = new int[] {3,6}; breakNine.add(nb); nb = new int[] {6,6}; breakNine.add(nb); nb = new int[] {9,6}; breakNine.add(nb);
+        nb = new int[] {3,9}; breakNine.add(nb); nb = new int[] {6,9}; breakNine.add(nb); nb = new int[] {9,9}; breakNine.add(nb);
+        int bWidth = 3;
+        int bHeight = 3;
+
+        ArrayList<int[]> breakSix = new ArrayList<int[]>(); //break points for 6x6
+        int[] sb = {3,2}; breakSix.add(sb); sb = new int[] {6,2}; breakSix.add(sb);
+        sb = new int[] {3,4}; breakSix.add(sb);sb = new int[] {6,4}; breakSix.add(sb);
+        sb = new int[] {3,6}; breakSix.add(sb);sb = new int[] {6,6}; breakSix.add(sb);
+
+        ArrayList<int[]> breakFour = new ArrayList<int[]>(); // break points for 4x4
+        int[] fb = {2,2}; breakFour.add(fb); fb = new int[] {4,2}; breakFour.add(fb);
+        fb = new int[] {2,4}; breakFour.add(fb); fb = new int[] {4,4}; breakFour.add(fb);
+
+        int errorCount = 0;
+        for(int x = 0; x<board;x++){
+            for(int y = 0;y < board;y++){
+                boolean errorFlag = false;
+                //check every square for errors
+                for(int xx = 0;xx<board;xx++){ // check row
+                    if(xx != x & currBoard[x][y].getNum() != 0){
+                        if(currBoard[xx][y].getNum() == currBoard[x][y].getNum()){
+                            currBoard[xx][y].setError(true);
+                            errorFlag = true;
+                            errorCount++;
+                        }
+                    }
+                }
+                for(int yy = 0;yy<board;yy++){ // check col
+                    if(yy != y & currBoard[x][y].getNum() != 0){
+                        if(currBoard[x][yy].getNum() == currBoard[x][y].getNum()){
+                            currBoard[x][yy].setError(true);
+                            errorFlag = true;
+                            errorCount++;
+                        }
+                    }
+                }
+
+                //check box
+                ArrayList<int[]> breakPoints;
+                int[] bPoint = new int[2];
+                if(board == 9){
+                    breakPoints = breakNine;
+                }else if(board == 6){
+                    breakPoints = breakSix;
+                }else if(board == 4){
+                    breakPoints = breakFour;
+                }else{
+                    breakPoints = breakNine;
+                }
+                for(int b = 0;b<breakPoints.size();b++){
+                    if(x< breakPoints.get(b)[0] & y< breakPoints.get(b)[1]){
+                        bPoint = breakPoints.get(b);
+                        break;
+                    }
+                }
+                for(int xx = bPoint[0]-bWidth;xx<bPoint[0];xx++){
+                    for(int yy = bPoint[1]-bHeight;yy<bPoint[1];yy++){
+                        if(xx != x & yy != y & currBoard[x][y].getNum() != 0){
+                            if(currBoard[xx][yy].getNum() == currBoard[x][y].getNum()){
+                                currBoard[xx][yy].setError(true);
+                                errorFlag = true;
+                                errorCount++;
+                            }
+                        }
+                    }
+                }
+                if(errorFlag){
+                    currBoard[x][y].setError(true);
+                }else{
+                    currBoard[x][y].setError(false);
+                }
+                if(errorCount > 0){
+                    System.out.println("hooboy, errors: "+errorCount);
+                }
+            }
+        }
+        for(int y=0;y<board;y++){
+            for(int x =0;x<board;x++){
+                if(currBoard[x][y].getError()){
+                    System.out.print(" 1 ");
+                }else{
+                    System.out.print(" 0 ");
+                }
+            }
+            System.out.println();
+            System.out.println();
+        }
+    }
+
     @Override
     public boolean onTouchEvent(MotionEvent motionEvent) {
         int touchX = (int)motionEvent.getX();
@@ -639,10 +770,18 @@ public class GameView extends SurfaceView implements Runnable {
             int pointerId = motionEvent.getPointerId(index);
             switch(action){
                 case MotionEvent.ACTION_DOWN:
-                    pointerLoc(touchX,touchY);
+                    if(touchY > bCoords[3]){
+                        selectLoc(touchX,touchY);
+                    }else if(touchY > bCoords[1]){
+                        pointerLoc(touchX,touchY);
+                    }
                     break;
                 case MotionEvent.ACTION_MOVE:
-                    pointerLoc(touchX,touchY);
+                    if(touchY > bCoords[3]){
+                        selectLoc(touchX,touchY);
+                    }else if(touchY > bCoords[1]){
+                        pointerLoc(touchX,touchY);
+                    }
                     break;
 
             }
