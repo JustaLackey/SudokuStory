@@ -120,8 +120,8 @@ public class Sudoku
         while (clueCount > difficulty){
             while (true){
                 r = rand.nextInt(size);
-                c = rand.nextInt(size); //You may have to look into this more, this seems specific to 9x9
-                if(clueCount > 60){ //groups of 4
+                c = rand.nextInt(size);
+                if(clueCount > Math.round(2*(size*size)/3)){ //groups of 4
                     if (r != (size-1) && c != (size-1) && b[r][c] != 0 && b[r][c+1] != 0 && b[r+1][c] != 0 && b[r+1][c+1] != 0){
                         for (int i = 0; i < 2; i++){
                             b[r][c+i] = 0;
@@ -130,7 +130,7 @@ public class Sudoku
                         break;
                     }
                 }
-                else if (clueCount > 40){ //groups of 2
+                else if (clueCount > Math.round((size*size)/2)){ //groups of 2
                     if (c != (size-1) && b[r][c] != 0 && b[r][c+1] != 0){ //extends to the right
                         for (int i = 0; i < 2; i++)
                             b[r][c+i] = 0;
@@ -157,9 +157,15 @@ public class Sudoku
             }
 
             if (numberOfSolutions <= 1){
-                for(int i = 0; i < board.length; i++)
-                    for(int j = 0; j < board[i].length; j++)
+                for(int i = 0; i < board.length; i++){
+                    for(int j = 0; j < board[i].length; j++){
                         board[i][j].setNum(b[i][j]);
+                        if(b[i][j] == 0){
+                            board[i][j].setFixed(false);
+                        }
+
+                    }
+                }
                 clueCount -= clueCount > 60 ? 4 : clueCount > 40 ? 2 : 1;
             }
             else
@@ -183,9 +189,14 @@ public class Sudoku
         if (tried[r][c])
             return removeNums(rand.nextInt(size), rand.nextInt(size), clueCount, remain, boardCopy);
         if (clueCount <= difficulty){
-            for(int i = 0; i < board.length; i++)
-                for(int j = 0; j < board[i].length; j++)
+            for(int i = 0; i < board.length; i++){
+                for(int j = 0; j < board[i].length; j++){
                     board[i][j].setNum(boardCopy[i][j]);
+                    if(boardCopy[i][j] == 0){
+                        board[i][j].setFixed(false);
+                    }
+                }
+            }
             return true;
         }
         int[][] b = boardCopy.clone();

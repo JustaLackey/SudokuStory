@@ -203,7 +203,7 @@ public class GameView extends SurfaceView implements Runnable {
                     break;
 
                 case -2: //dev flag? edit this later
-                    currBoard = generateBoard("DISMANTLE", HARD_BOARD);
+                    currBoard = generateBoard("DISMANTLE", EASY_BOARD);
                     dProg = 5;
                     dprogFlag = false;
                     break;
@@ -673,6 +673,7 @@ public class GameView extends SurfaceView implements Runnable {
         fb = new int[] {2,4}; breakFour.add(fb); fb = new int[] {4,4}; breakFour.add(fb);
 
         int errorCount = 0;
+        int zeroCount = 0;
         for(int x = 0; x<board;x++){
             for(int y = 0;y < board;y++){
                 boolean errorFlag = false;
@@ -725,26 +726,20 @@ public class GameView extends SurfaceView implements Runnable {
                         }
                     }
                 }
+                if(currBoard[x][y].getNum() == 0){
+                    zeroCount++;
+                }
                 if(errorFlag){
                     currBoard[x][y].setError(true);
                 }else{
                     currBoard[x][y].setError(false);
                 }
-                if(errorCount > 0){
-                    System.out.println("hooboy, errors: "+errorCount);
-                }
             }
         }
-        for(int y=0;y<board;y++){
-            for(int x =0;x<board;x++){
-                if(currBoard[x][y].getError()){
-                    System.out.print(" 1 ");
-                }else{
-                    System.out.print(" 0 ");
-                }
-            }
-            System.out.println();
-            System.out.println();
+        if(zeroCount == 0 & errorCount == 0){
+            System.out.println("win!");
+            //INSERT BOARD WIN HERE
+            //dProg = 6;
         }
     }
 

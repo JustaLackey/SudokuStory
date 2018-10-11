@@ -16,6 +16,7 @@ public class Cell
 
     private Sudoku world;
     private int num, hiddenNum, timer, row, col;
+    private boolean fixed,error;
     private ArrayList<Integer> miniNums;
     private CellState state = CellState.EMPTY;
 
@@ -25,6 +26,8 @@ public class Cell
         col = column;
         num = 0;
         miniNums = new ArrayList<Integer>();
+        fixed = true;
+        error = false;
     }
     public int getNum(){return num;}
     public int getHiddenNum(){return hiddenNum;}
@@ -38,5 +41,15 @@ public class Cell
             hiddenNum = num;
             state = CellState.HARDSET;
         }
+    }
+
+    public boolean getFixed(){return fixed;}
+    public void setFixed(boolean fix){
+        fixed = fix;
+    }
+
+    public boolean getError(){return error;}
+    public void setError(boolean err){
+        error = err;
     }
 }
