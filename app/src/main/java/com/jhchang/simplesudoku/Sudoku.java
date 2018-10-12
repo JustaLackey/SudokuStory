@@ -65,12 +65,22 @@ public class Sudoku
      */
     public void createBoard()
     {
-        do{
-            createCells();
-            setNums(0,0);
-            startTime = System.nanoTime();
-            tried = new boolean[size][size];
-        }while(/*!removeNums(rand.nextInt(9), rand.nextInt(9), startingClues, chances, convertToMatrix())*/!removeNums());
+        if(size==9){
+            do{
+                createCells();
+                setNums(0,0);
+                startTime = System.nanoTime();
+                tried = new boolean[size][size];
+            }while(!removeNums());
+        }else if(size==4){
+            do{
+                createCells();
+                setNums(0,0);
+                startTime = System.nanoTime();
+                tried = new boolean[size][size];
+            }while(!removeNumsFour());
+        }
+
     }
 
     /**
@@ -176,6 +186,66 @@ public class Sudoku
                 return false;
             }
         }
+        return true;
+    }
+
+    public boolean removeNumsFour(){
+        int clueCount = size*size, r = 0, c = 0; //clue count only works with perfect squares, adjust for 6x6
+        int[][] b = convertToMatrix();
+        while (clueCount > difficulty){
+            while (true){
+                r = rand.nextInt(size);
+                c = rand.nextInt(size);
+                if(clueCount > difficulty+size){ //groups of 2
+                    if (c != (size-1) && b[r][c] != 0 && b[r][c+1] != 0){ //extends to the right
+                        for (int i = 0; i < 2; i++)
+                            b[r][c+i] = 0;
+                        break;
+                    }
+                    else if (r != (size-1) && b[r][c] != 0 && b[r+1][c] != 0){ //extends below
+                        for (int i = 0; i < 2; i++)
+                            b[r+i][c] = 0;
+                        break;
+                    }
+                }
+                else if (b[r][c] != 0){ //1 by 1
+                    b[r][c] = 0;
+                    break;
+                }
+            }
+
+            numberOfSolutions = 0;
+            try{
+                checkForOneSolution(0,0,b.clone());
+            }
+            catch(Exception e){
+                //System.out.println(e);
+            }
+
+            if (numberOfSolutions <= 1){
+                for(int i = 0; i < board.length; i++){
+                    for(int j = 0; j < board[i].length; j++){
+                        board[i][j].setNum(b[i][j]);
+                        if(b[i][j] == 0){
+                            board[i][j].setFixed(false);
+                        }
+
+                    }
+                }
+                clueCount -= clueCount > difficulty+3 ? 2 : 1;
+            }
+            else
+                b = convertToMatrix();
+
+            if (System.nanoTime() - startTime > Math.pow(10, 9) * 5){ // break out of loop if 5 seconds pass
+                out.println("Failed to reduce puzzle. Reached a clue count of: " + clueCount);
+                return false;
+            }
+        }
+        return true;
+    }
+
+    public boolean removeNumsSix(){
         return true;
     }
 

@@ -106,7 +106,7 @@ public class GameView extends SurfaceView implements Runnable {
             dTimer[i] = 0;
         }
         //dProg = 0; //init should be 0
-        dProg = -2;
+        dProg = 0;
         currScene = 0;
     }
     private void initValues(){  //This should account for all screen sizes
@@ -192,25 +192,24 @@ public class GameView extends SurfaceView implements Runnable {
                 case 3:
                     //3 to -1 is scene text
 
-
+                    currBoard = generateBoard("WAKE", HARD_BOARD);
+                    //dProg = 5;
                     //dProg = 5; //EDIT THIS OUT LATER
                     dprogFlag = false;
                 case 2:
-                    dialogue(canvas,"WAKE", posMid, 2,"none", normText, bigFont);
+                    dialogue(canvas,"WAKE", posMid, 2,"none", normText, bigFont,"center");
                 case 1:
                     dialogue(canvas,"Maybe this time you're dead.",
-                            posTopMid, 1,"none", fasterText, medFont);
+                            posTopMid, 1,"none", fasterText, medFont,"left");
                 case 0:
                     dialogue(canvas,"Every night you wonder whether you're asleep or dead.",
-                            posTop, 0,"none", fasterText, medFont);
+                            posTop, 0,"none", fasterText, medFont,"left");
                     break;
                 case -1:
                     dprogFlag = false;
                     break;
 
                 case -2: //dev flag? edit this later
-                    currBoard = generateBoard("WAKE", HARD_BOARD);
-                    dProg = 5;
                     dprogFlag = false;
                     break;
             }
@@ -477,10 +476,14 @@ public class GameView extends SurfaceView implements Runnable {
         paint.setTextAlign(Paint.Align.LEFT);
     }
 
-    private void dialogue(Canvas c, String msg, int pos, int timer, String effect, int textSpeed, int fontSize){
+    private void dialogue(Canvas c, String msg, int pos, int timer, String effect, int textSpeed, int fontSize, String align){
         if(fTimer[timer]>textSpeed & dTimer[timer] < msg.length()){
             fTimer[timer] = 0;
-            ++dTimer[timer];
+            dTimer[timer]++;
+        }
+        if(dTimer[timer] > msg.length() & !dprogFlag){
+            dTimer[timer] = msg.length();
+            dprogFlag = true;
         }
         if(fTimer[timer] == 0 & dTimer[timer] == msg.length()-1 & !dprogFlag){
             dprogFlag = true;
@@ -883,12 +886,21 @@ public class GameView extends SurfaceView implements Runnable {
     public boolean onTouchEvent(MotionEvent motionEvent) {
         int touchX = (int)motionEvent.getX();
         int touchY = (int)motionEvent.getY();
-        if(dProg <= 3){
+        if(dProg < 3){
+            switch (motionEvent.getAction() & MotionEvent.ACTION_MASK) {
+                case MotionEvent.ACTION_DOWN:
+                    dTimer[dProg] = 999;
+                    fTimer[dProg] = 0;
+                    break;
+                case MotionEvent.ACTION_UP:
+                    break;
+            }
+        }else if(dProg == 3){
             switch (motionEvent.getAction() & MotionEvent.ACTION_MASK) {
                 case MotionEvent.ACTION_DOWN:
                     System.out.println("touchY: "+touchY+ " screenY: "+screenY+" bigFont: "+bigFont);
                     if(touchY < screenY/2 + bigFont & touchY > screenY/2 - bigFont){
-                        dProg = -2; //edit this make sure it's good
+                        dProg = 5; //edit this make sure it's good
                         dprogFlag = false;
                     }
                     break;
