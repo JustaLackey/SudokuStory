@@ -121,7 +121,7 @@ public class Sudoku
             while (true){
                 r = rand.nextInt(size);
                 c = rand.nextInt(size);
-                if(clueCount > Math.round(2*(size*size)/3)){ //groups of 4
+                if(clueCount > Math.round(3*(size*size)/5)){ //groups of 4
                     if (r != (size-1) && c != (size-1) && b[r][c] != 0 && b[r][c+1] != 0 && b[r+1][c] != 0 && b[r+1][c+1] != 0){
                         for (int i = 0; i < 2; i++){
                             b[r][c+i] = 0;
@@ -166,7 +166,7 @@ public class Sudoku
 
                     }
                 }
-                clueCount -= clueCount > 60 ? 4 : clueCount > 40 ? 2 : 1;
+                clueCount -= clueCount > Math.round(3*(size*size)/5) ? 4 : clueCount > Math.round((size*size)/2) ? 2 : 1;
             }
             else
                 b = convertToMatrix();
@@ -201,7 +201,7 @@ public class Sudoku
         }
         int[][] b = boardCopy.clone();
         boolean right = false;
-        if(clueCount > Math.round(2*(size*size)/3)){ //groups of 4
+        if(clueCount > Math.round(3*(size*size)/5)){ //groups of 4
             if (r != (size-1) && c != (size-1) && !tried[r][c+1] && !tried[r+1][c] && !tried[r+1][c+1]){
                 for (int i = 0; i < 2; i++){
                     b[r][c+i] = 0;
@@ -244,11 +244,11 @@ public class Sudoku
         }
         System.out.println("Sol: " + numberOfSolutions + " Clues: " + clueCount);
         if (numberOfSolutions <= 1)
-            if (removeNums(rand.nextInt(size), rand.nextInt(size), clueCount - (clueCount > Math.round(2*(size*size)/3) ? 4 : clueCount > Math.round((size*size)/2) ? 2 : 1), chances, b))
+            if (removeNums(rand.nextInt(size), rand.nextInt(size), clueCount - (clueCount > Math.round(3*(size*size)/5) ? 4 : clueCount > Math.round((size*size)/2) ? 2 : 1), chances, b))
                 return true;
         //if this removal did not work currently or in the future, it will the execute the following code
 
-        if (clueCount > Math.round(2*(size*size)/3)){ //reset booleans that weren't tried back to normal
+        if (clueCount > Math.round(3*(size*size)/5)){ //reset booleans that weren't tried back to normal
             tried[r][c+1] = false;
             tried[r+1][c] = false;
             tried[r+1][c+1] = false;
