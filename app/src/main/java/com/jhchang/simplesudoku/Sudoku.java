@@ -117,11 +117,11 @@ public class Sudoku
     {
         int clueCount = size*size, r = 0, c = 0; //clue count only works with perfect squares, adjust for 6x6
         int[][] b = convertToMatrix();
-        while (clueCount > difficulty){
+        while (clueCount > difficulty){ //this doesn't work for 4x4 or 6x6
             while (true){
                 r = rand.nextInt(size);
                 c = rand.nextInt(size);
-                if(clueCount > Math.round(3*(size*size)/5)){ //groups of 4
+                if(clueCount > difficulty+Math.round(3*(size*size)/10)){ //groups of 4
                     if (r != (size-1) && c != (size-1) && b[r][c] != 0 && b[r][c+1] != 0 && b[r+1][c] != 0 && b[r+1][c+1] != 0){
                         for (int i = 0; i < 2; i++){
                             b[r][c+i] = 0;
@@ -130,7 +130,7 @@ public class Sudoku
                         break;
                     }
                 }
-                else if (clueCount > Math.round((size*size)/2)){ //groups of 2
+                else if (clueCount > difficulty+Math.round(1*(size*size)/5)){ //groups of 2
                     if (c != (size-1) && b[r][c] != 0 && b[r][c+1] != 0){ //extends to the right
                         for (int i = 0; i < 2; i++)
                             b[r][c+i] = 0;
@@ -166,7 +166,7 @@ public class Sudoku
 
                     }
                 }
-                clueCount -= clueCount > Math.round(3*(size*size)/5) ? 4 : clueCount > Math.round((size*size)/2) ? 2 : 1;
+                clueCount -= clueCount > difficulty+Math.round(3*(size*size)/10) ? 4 : clueCount > difficulty+Math.round(1*(size*size)/5) ? 2 : 1;
             }
             else
                 b = convertToMatrix();
