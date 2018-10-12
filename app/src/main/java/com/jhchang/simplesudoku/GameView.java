@@ -130,6 +130,12 @@ public class GameView extends SurfaceView implements Runnable {
         boardNine[1] = Math.round(screenY/2) - (48+boxSize*9)/2;
         boardNine[2] = boardNine[0] + (48+boxSize*9);
         boardNine[3] = boardNine[1] + (48+boxSize*9);
+
+
+        boardFour[0] = Math.round(screenX/2) - (48+boxSize*4)/2;
+        boardFour[1] = Math.round(screenY/2) - (48+boxSize*4)/2;
+        boardFour[2] = boardFour[0] + (48+boxSize*4);
+        boardFour[3] = boardFour[1] + (48+boxSize*4);
     }
     private Cell[][] generateBoard(String msg, int diff){
         int[] square = new int[4]; //input value 0-8, fixed num value 0-1, select value 0-1, highlight value 0-1
@@ -168,8 +174,8 @@ public class GameView extends SurfaceView implements Runnable {
             switch(dProg){
                 case 5:
                     //draw sudoku board
-                    drawBoard(canvas, "DISMANTLE",Color.WHITE,Color.BLACK);
-                    drawAvailNum(canvas, "DISMANTLE",Color.WHITE);
+                    drawBoard(canvas, "WAKE",Color.WHITE,Color.BLACK);
+                    drawAvailNum(canvas, "WAKE",Color.WHITE);
                     //drawBoard(canvas, "WAKE",Color.WHITE,Color.BLACK);
                     break;
                 case 4:
@@ -203,7 +209,7 @@ public class GameView extends SurfaceView implements Runnable {
                     break;
 
                 case -2: //dev flag? edit this later
-                    currBoard = generateBoard("DISMANTLE", EASY_BOARD);
+                    currBoard = generateBoard("WAKE", HARD_BOARD);
                     dProg = 5;
                     dprogFlag = false;
                     break;
@@ -240,9 +246,10 @@ public class GameView extends SurfaceView implements Runnable {
         //draw individual blocks
         paint.setColor(secColor);
 
-        drawNineBoard(c,msg,priColor,secColor,bCoords);
+        //drawNineBoard(c,msg,priColor,secColor,bCoords);
 
         /* draw for specific board, implement once you have all board info set up
+        */
         switch(boardSize){
             case 9:
                 drawNineBoard(c,msg,priColor,secColor,bCoords);
@@ -257,7 +264,6 @@ public class GameView extends SurfaceView implements Runnable {
                 drawNineBoard(c,msg,priColor,secColor,bCoords);
                 break;
         }
-        */
 
 
 
@@ -347,12 +353,12 @@ public class GameView extends SurfaceView implements Runnable {
                     xSpace = 12;
                     break;
                 case 3:
-                    xSpace+=6;
+                    xSpace+=8;
                 case 1:
                 case 2:
                 case 4:
                 case 5:
-                    xSpace+=2;
+                    xSpace+=3;
                     break;
             }
             for(int y = 0;y<board;y++){
@@ -362,7 +368,7 @@ public class GameView extends SurfaceView implements Runnable {
                         break;
                     case 2:
                     case 4:
-                        ySpace+=6;
+                        ySpace+=8;
                     case 1:
                     case 3:
                     case 5:
@@ -391,40 +397,64 @@ public class GameView extends SurfaceView implements Runnable {
         for(int x = 0;x< board;x++){
             switch(x){
                 case 0:
-                    xSpace = 12;
+                    xSpace = 16;
                     break;
                 case 2:
-                    xSpace+=6;
+                    xSpace+=8;
                 case 1:
                 case 3:
-                    xSpace+=2;
+                    xSpace+=3;
                     break;
             }
             for(int y = 0;y<board;y++){
                 switch(y){
                     case 0:
-                        ySpace = 12;
+                        ySpace = 16;
                         break;
                     case 2:
-                        ySpace+=6;
+                        ySpace+=8;
                     case 1:
                     case 3:
-                        ySpace+=2;
+                        ySpace+=3;
                         break;
                 }
-                paint.setColor(secColor);
+                int hit = 0;
+                boolean fixed = currBoard[x][y].getFixed();
+                if(activeTouch[0]==x & activeTouch[1]==y){
+                    hit = 1;
+                    paint.setColor(HIGHLIGHT_COLOR);
+                }else if(activeTouch[0]==x || activeTouch[1]==y) {
+                    hit = 2;
+                    paint.setColor(NEIGHBOR_COLOR);
+                }else if(currBoard[x][y].getFixed()) {
+                    hit = 3;
+                    paint.setColor(FIXED_COLOR);
+                }else{
+                    hit = 4;
+                    paint.setColor(secColor);
+                }
                 int tempX = bCoords[0]+xSpace+boxSize*x;
                 int tempY = bCoords[1]+ySpace+boxSize*y;
+                int color = paint.getColor();
                 c.drawRect(tempX,tempY,tempX+boxSize,tempY+boxSize,paint);
 
                 // draw nums from board, still testing
-                paint.setColor(priColor);
+                if(currBoard[x][y].getError()){
+                    paint.setColor(ERROR_COLOR);
+                    System.out.print("error color " + ERROR_COLOR);
+                }else{
+                    paint.setColor(priColor);
+                    System.out.print("normal color" + priColor);
+                }
                 paint.setTextSize(medFont);
+                paint.setTextAlign(Paint.Align.CENTER);
                 int squareVal = currBoard[x][y].getNum();
                 if(squareVal > 0){
                     String tempMsg =  String.valueOf(msg.charAt(squareVal - 1));
-                    c.drawText(tempMsg,tempX,tempY+boxSize,paint);
+                    c.drawText(tempMsg,tempX+medFont/2,tempY+boxSize,paint);
                 }
+
+                paint.setTextAlign(Paint.Align.LEFT);
             }
         }
     }
@@ -555,7 +585,6 @@ public class GameView extends SurfaceView implements Runnable {
 
     private void pointerLoc(int touchX, int touchY){
         int[] bCoords;
-        int xSpace = 0, ySpace = 0;
         switch(board){
             case 9:
                 bCoords = boardNine;
@@ -571,13 +600,24 @@ public class GameView extends SurfaceView implements Runnable {
                 break;
         }
 
-        /* will have to set up board specific locator func since their spacing is different
         switch(board){
             case 9:
                 locNineBoard(touchX,touchY,bCoords);
                 break;
+            case 6:
+                locSixBoard(touchX,touchY,bCoords);
+                break;
+            case 4:
+                locFourBoard(touchX,touchY,bCoords);
+                break;
+            default:
+                locNineBoard(touchX,touchY,bCoords);
+                break;
         }
-        */
+    }
+
+    private void locNineBoard(int touchX, int touchY, int[] bCoords){
+        int xSpace = 0, ySpace = 0;
         xloop:
         for(int x = 0;x< board;x++){
             switch(x){
@@ -611,6 +651,98 @@ public class GameView extends SurfaceView implements Runnable {
                     case 7:
                     case 8:
                         ySpace+=2;
+                        break;
+                }
+
+                int tempX = bCoords[0]+xSpace+boxSize*x;
+                int tempY = bCoords[1]+ySpace+boxSize*y;
+                //extrapolate position and dimension based off of below
+                //c.drawRect(tempX,tempY,tempX+boxSize,tempY+boxSize,paint);
+
+                if(touchX > tempX & touchY > tempY & touchX < tempX+boxSize & touchY < tempY+boxSize){
+                    activeTouch[0]=x;
+                    activeTouch[1]=y;
+                    System.out.println("tap at touchX: " + touchX + " touchY: " + touchY);
+                    System.out.println("touch identified at location x: " + x + " y: " + y);
+                    break xloop;
+                }
+            }
+        }
+    }
+
+    private void locSixBoard(int touchX, int touchY, int[] bCoords){ //THIS IS INCOMPLETE AND NEEDS TO BE EDITED
+        int xSpace = 0, ySpace = 0;
+        xloop:
+        for(int x = 0;x< board;x++){
+            switch(x){
+                case 0:
+                    xSpace = 12;
+                    break;
+                case 3:
+                    xSpace+=8;
+                case 1:
+                case 2:
+                case 4:
+                case 5:
+                    xSpace+=3;
+                    break;
+            }
+            for(int y = 0;y<board;y++){
+                switch(y){
+                    case 0:
+                        ySpace = 12;
+                        break;
+                    case 2:
+                    case 4:
+                        ySpace+=8;
+                    case 1:
+                    case 3:
+                    case 5:
+                        ySpace+=2;
+                        break;
+                }
+
+                int tempX = bCoords[0]+xSpace+boxSize*x;
+                int tempY = bCoords[1]+ySpace+boxSize*y;
+                //extrapolate position and dimension based off of below
+                //c.drawRect(tempX,tempY,tempX+boxSize,tempY+boxSize,paint);
+
+                if(touchX > tempX & touchY > tempY & touchX < tempX+boxSize & touchY < tempY+boxSize){
+                    activeTouch[0]=x;
+                    activeTouch[1]=y;
+                    System.out.println("tap at touchX: " + touchX + " touchY: " + touchY);
+                    System.out.println("touch identified at location x: " + x + " y: " + y);
+                    break xloop;
+                }
+            }
+        }
+    }
+
+    private void locFourBoard(int touchX, int touchY, int[] bCoords){
+        int xSpace = 0, ySpace = 0;
+        xloop:
+        for(int x = 0;x< board;x++){
+            switch(x){
+                case 0:
+                    xSpace = 16;
+                    break;
+                case 2:
+                    xSpace+=8;
+                case 1:
+                case 3:
+                    xSpace+=3;
+                    break;
+            }
+            for(int y = 0;y<board;y++){
+                switch(y){
+                    case 0:
+                        ySpace = 16;
+                        break;
+                    case 2:
+                        ySpace+=8;
+                    case 1:
+                    case 3:
+                        ySpace+=3;
                         break;
                 }
 
@@ -704,8 +836,12 @@ public class GameView extends SurfaceView implements Runnable {
                     breakPoints = breakNine;
                 }else if(board == 6){
                     breakPoints = breakSix;
+                    bWidth = 3;
+                    bHeight = 2;
                 }else if(board == 4){
                     breakPoints = breakFour;
+                    bWidth = 2;
+                    bHeight = 2;
                 }else{
                     breakPoints = breakNine;
                 }
