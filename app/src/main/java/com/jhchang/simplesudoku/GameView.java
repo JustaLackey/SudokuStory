@@ -98,8 +98,6 @@ public class GameView extends SurfaceView implements Runnable {
         currScene = 1; //starts at 0, change for starting level
     }
     private void initValues(){  //This should account for all screen sizes
-        //System.out.println(screenX);
-        //System.out.println(screenY);
         //border sizes:
         //outer border, largest = 12
         //box border, medium = 6
@@ -486,14 +484,16 @@ public class GameView extends SurfaceView implements Runnable {
     }
 
     private void drawAvailNum(Canvas c, String msg, int priColor) {
+        int startY = Math.round(7*screenY/8);
+        /*
         int spaceX = 24;
-        int letterX = medFont;
+        int letterX = bigFont;
         int startX = screenX/2 - (letterX*msg.length()+spaceX*(msg.length()-1))/2;
         if(startX < 0){ //this shouldn't happen?
             startX = 24;
             spaceX = 12;
         }
-        int startY = Math.round(7*screenY/8);
+        paint.setTextSize(bigFont);
         paint.setTextAlign(Paint.Align.CENTER);
         paint.setColor(priColor);
         for(int i=0;i<msg.length();i++){
@@ -501,6 +501,13 @@ public class GameView extends SurfaceView implements Runnable {
             c.drawText(tempMsg, startX+letterX*i+spaceX*i,startY,paint);
         }
         paint.setTextAlign(Paint.Align.LEFT);
+        */
+
+        paint.setLetterSpacing((float)0.2);
+        paint.setTextSize(bigFont);
+        int textWidth = Math.round(paint.measureText(msg));
+        c.drawText(msg,screenX/2-textWidth/2,startY,paint);
+        paint.setLetterSpacing(0);
     }
 
     private void drawLine(Canvas c, int num){
@@ -509,7 +516,6 @@ public class GameView extends SurfaceView implements Runnable {
                     lineList.get(num).getPos(), num,lineList.get(num).getEffect(),
                     lineList.get(num).getSpeed(), lineList.get(num).getFontSize());
         }else if(dProg < 4){
-            System.out.println(dProg);
             dProg++;
         }
     }
@@ -528,7 +534,6 @@ public class GameView extends SurfaceView implements Runnable {
             dprogFlag = true;
         }
         if(dprogFlag & dProg < 4){
-            System.out.println(dProg);
             dprogFlag = false;
             dProg++;
         }
@@ -564,7 +569,15 @@ public class GameView extends SurfaceView implements Runnable {
             timer = maxTime;
         }
         if(lines <=1){
-            c.drawText(msg.substring(0,dTimer[timer]),screenX/2-textWidth/2,100+((screenY/4)*pos)-fontSize/2,paint);
+            if(lineList.get(timer).isClickable()){
+                paint.setLetterSpacing((float)0.2);
+                textWidth = Math.round(paint.measureText(msg));
+                c.drawText(msg.substring(0,dTimer[timer]),screenX/2-textWidth/2,100+((screenY/4)*pos)-fontSize/2,paint);
+                paint.setLetterSpacing(0);
+            }else{
+                c.drawText(msg.substring(0,dTimer[timer]),screenX/2-textWidth/2,100+((screenY/4)*pos)-fontSize/2,paint);
+            }
+
         }else{
             for(int i=0;i<msgLine.size();i++){
                 String temp = msgLine.get(i);
@@ -589,6 +602,11 @@ public class GameView extends SurfaceView implements Runnable {
         }
     }
     private void targetCoord(String msg, int startPos){
+        int textWidth = Math.round(paint.measureText(msg));
+        int[] letterWidth;
+        for(int i=0;i<msg.length();i++){
+
+        }
 
     }
     private void btnSpread(Canvas c, String msg, int timer, int pos, int fontSize){
@@ -805,10 +823,10 @@ public class GameView extends SurfaceView implements Runnable {
         }
     }
 
-    private void selectLoc(int touchX,int touchY){
+    private void selectLoc(int touchX,int touchY){ //REDO THIS WHOLE THING WITH NEW LETTER SPACING
 
         int spaceX = 24;
-        int letterX = medFont;
+        int letterX = bigFont;
         int startX = screenX/2 - (letterX*board+spaceX*(board-1))/2;
         if(startX < 0){ //this shouldn't happen?
             startX = 24;
@@ -816,8 +834,8 @@ public class GameView extends SurfaceView implements Runnable {
         }
         int startY = Math.round(7*screenY/8);
         for(int i=0;i<board;i++){
-            if(touchX > startX+letterX*i+spaceX*i-Math.round(medFont/2) & touchX < startX+letterX*i+spaceX*i+Math.round(medFont/2)
-                    & touchY > startY - Math.round(medFont/2) & touchY < startY + Math.round(medFont/2)
+            if(touchX > startX+letterX*i+spaceX*i-Math.round(bigFont/2) & touchX < startX+letterX*i+spaceX*i+Math.round(bigFont/2)
+                    & touchY > startY - Math.round(bigFont/2) & touchY < startY + Math.round(bigFont/2)
                     & activeTouch[0] >= 0 & activeTouch[1] >= 0){
                     if(!currBoard[activeTouch[0]][activeTouch[1]].getFixed()){
                         currBoard[activeTouch[0]][activeTouch[1]].setNum(i+1);
@@ -957,7 +975,6 @@ public class GameView extends SurfaceView implements Runnable {
                             if(touchY < (lineList.get(i).getPos() * (screenY/4)) + bigFont
                             & touchY > (lineList.get(i).getPos() * (screenY/4)) - bigFont){
                                 dProg = 5; //edit this make sure it's good
-                                System.out.println(dProg);
                                 boardSelect = lineList.get(i).getBoardID(); //temp values
                                 dprogFlag = false;
                             }
@@ -986,10 +1003,8 @@ public class GameView extends SurfaceView implements Runnable {
                         pointerLoc(touchX,touchY);
                     }
 
-                    if(touchY < 200){ //THIS IS A DEV SKIP
+                    if(touchY < 200){ //THIS IS A DEV SKIP, REMOVE LATER
                         winState();
-                        //INSERT BOARD WIN HERE
-                        //dProg = 6;
                     }
                     break;
                 case MotionEvent.ACTION_MOVE:
