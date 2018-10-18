@@ -31,21 +31,22 @@ public class GameView extends SurfaceView implements Runnable {
 
     private ArrayList<Line> lineList = new ArrayList<Line>();
 
-    private Paint paint, boardPaint, scenePaint, numPaint;
+    private Paint paint, boardPaint, scenePaint, numPaint,transPaint;
     private Canvas canvas;
     private SurfaceHolder surfaceHolder;
 
-    private boolean dprogFlag, bsFlag;
+    private boolean dprogFlag, bsFlag,moveFlag,effectFlag;
     //a screenX holder
     private int screenX, screenY, level, bgColor,fontColor, dProg, currScene, boxSize, boardSelect;
     private String currWord;
     //int fTimer1, fTimer2, fTimer3, fTimer4, dTimer1, dTimer2, dTimer3, dTimer4;
     private int[] fTimer = new int[5];
-    private int[] dTimer = new int[5];;
+    private int[] dTimer = new int[5];
     private int[] bsTimer = new int [9];
     private int[] targetX = new int[9];
     private int[] targetY = new int[9];
     private int[] activeTouch = {-1,-1};
+    private int effectTimer = 0; private int moveTimer = 0;
     //context to be used in onTouchEvent to cause the activity transition from GameAvtivity to MainActivity.
     private Context context;
     //board dimensions
@@ -84,10 +85,11 @@ public class GameView extends SurfaceView implements Runnable {
         sceneManager = new SceneManager();
 
         //countMisses = 0;
-        dprogFlag = false; bsFlag = false;
+        dprogFlag = false; bsFlag = false; moveFlag = false; effectFlag = false;
         level = 0;
         surfaceHolder = getHolder();
         paint = new Paint(); boardPaint = new Paint(); scenePaint = new Paint(); numPaint = new Paint();
+        transPaint =new Paint();
         bgColor = Color.BLACK;
         fontColor = Color.WHITE;
         for(int i = 0;i<5;i++){
@@ -189,23 +191,99 @@ public class GameView extends SurfaceView implements Runnable {
                     drawBoard(canvas, boardObj.getWord(),Color.WHITE,Color.BLACK);
                     drawAvailNum(canvas, boardObj.getWord(),Color.WHITE);
                     //drawBoard(canvas, "WAKE",Color.WHITE,Color.BLACK);
+
+
+                    if(effectTimer > 0){
+                        transPaint.setColor(Color.BLACK);
+                        transPaint.setAlpha(effectTimer);
+                        canvas.drawRect(0,0,screenX,screenY,transPaint);
+                    }
+
+                    if(!effectFlag){
+                        if(effectTimer - 10 > 0){
+                            effectTimer-=10;
+                        }else{
+                            effectTimer = 0;
+                        }
+                    }
+                    if(effectTimer<=0){
+                        effectTimer = 0;
+                        effectFlag = true;
+                    }
+                    if(effectFlag){
+                        effectFlag = false;
+                    }
+
                     break;
                 case 6:
-                    //draw animation of button becoming sudoku board
-                    if(!bsFlag){
-                        bsFlag = true;  //make sure to set this false when animation is done
-                        targetCoord("WAKE",posMid);
-                    }
-                    btnSpread(canvas, "W",0, posMid, bigFont);
-                    btnSpread(canvas, "A",1, posMid, bigFont);
-                    btnSpread(canvas, "K",2, posMid, bigFont);
-                    btnSpread(canvas, "E",3, posMid, bigFont);
+
                     break;
                 case 5:
-                    boardObj = sceneObj.getThisBoard(boardSelect);
-                    currBoard = generateBoard(boardObj.getWord(), boardObj.getDifficulty());
-                    dProg = 7;
-                    dprogFlag = false;
+                    if(effectTimer==0){
+                        boardObj = sceneObj.getThisBoard(boardSelect);
+                        currBoard = generateBoard(boardObj.getWord(), boardObj.getDifficulty());
+                        dprogFlag = false;
+                    }
+
+                    drawLine(canvas, 4);
+                    drawLine(canvas, 3);
+                    drawLine(canvas, 2);
+                    drawLine(canvas, 1);
+                    drawLine(canvas, 0);
+
+                    /* tried to implement moving line effect, it's fucked, fuck it fuck fuck
+                    int clicked = 0;
+                    for(int i = 0;i<lineList.size();i++){
+                        drawLine(canvas, i);
+                        if(lineList.get(i).getLine() == boardObj.getWord()){
+                            clicked = i;
+                        }
+                    }
+
+                    transPaint.setColor(Color.BLACK);
+                    transPaint.setAlpha(effectTimer);
+                    canvas.drawRect(0,0,screenX,screenY,transPaint);
+
+
+                    drawMovingLine(canvas,clicked);
+
+                    if(!effectFlag){
+                        effectTimer+=5;
+                    }
+
+                    if(effectTimer>=255){
+                        effectFlag = true;
+                    }
+                    if(effectFlag & moveFlag){
+                        effectFlag = false;
+                        moveFlag = false;
+                        effectTimer=0;
+                        dProg = 7;
+                    }
+                    */
+
+
+                    transPaint.setColor(Color.BLACK);
+                    transPaint.setAlpha(effectTimer);
+                    canvas.drawRect(0,0,screenX,screenY,transPaint);
+
+                    if(!effectFlag){
+                        if(effectTimer + 7 <  255){
+                            effectTimer+=7;
+                        }else{
+                            effectTimer = 255;
+                        }
+                    }
+                    if(effectTimer>=255){
+                       effectTimer = 255;
+                       effectFlag = true;
+                    }
+                    if(effectFlag){
+                        effectFlag = false;
+                        //effectTimer=0;
+                        dProg = 7;
+                    }
+                    break;
                 case 4:
                     drawLine(canvas,4);
                 case 3:
@@ -474,23 +552,6 @@ public class GameView extends SurfaceView implements Runnable {
 
     private void drawAvailNum(Canvas c, String msg, int priColor) {
         int startY = Math.round(7*screenY/8);
-        /*
-        int spaceX = 24;
-        int letterX = bigFont;
-        int startX = screenX/2 - (letterX*msg.length()+spaceX*(msg.length()-1))/2;
-        if(startX < 0){ //this shouldn't happen?
-            startX = 24;
-            spaceX = 12;
-        }
-        paint.setTextSize(bigFont);
-        paint.setTextAlign(Paint.Align.CENTER);
-        paint.setColor(priColor);
-        for(int i=0;i<msg.length();i++){
-            String tempMsg =  String.valueOf(msg.charAt(i));
-            c.drawText(tempMsg, startX+letterX*i+spaceX*i,startY,paint);
-        }
-        paint.setTextAlign(Paint.Align.LEFT);
-        */
 
         numPaint.setColor(Color.WHITE);
         numPaint.setLetterSpacing((float)0.4);
@@ -594,6 +655,26 @@ public class GameView extends SurfaceView implements Runnable {
             fTimer[timer]++;
         }
     }
+
+    private void drawMovingLine(Canvas c, int num){
+        String tempLine = lineList.get(num).getLine();
+        int pos = lineList.get(num).getPos();
+        pos = 100+((screenY/4)*pos);
+        int goal = Math.round(7*screenY/8);
+        if(moveTimer+pos+.01 < goal){
+            moveTimer+=pos+.01;
+            moveFlag = false;
+        }else{
+            moveFlag = true;
+            moveTimer = goal;
+        }
+        paint.setLetterSpacing((float)0.4);
+        paint.setTextAlign(Paint.Align.CENTER);
+        c.drawText(tempLine, screenX/2, moveTimer,paint);
+        paint.setTextAlign(Paint.Align.LEFT);
+        paint.setLetterSpacing(0);
+    }
+
     private void targetCoord(String msg, int startPos){
         int textWidth = Math.round(paint.measureText(msg));
         int[] letterWidth;
