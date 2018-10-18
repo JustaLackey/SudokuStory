@@ -163,6 +163,51 @@ public class GameView extends SurfaceView implements Runnable {
 
     }
 
+    private void fadeOut(Canvas c){
+        transPaint.setColor(Color.BLACK);
+        transPaint.setAlpha(effectTimer);
+        c.drawRect(0,0,screenX,screenY,transPaint);
+
+        if(!effectFlag){
+            if(effectTimer + 7 <  255){
+                effectTimer+=7;
+            }else{
+                effectTimer = 255;
+            }
+        }
+        if(effectTimer>=255){
+            effectTimer = 255;
+            effectFlag = true;
+        }
+        if(effectFlag){
+            effectFlag = false;
+            //effectTimer=0;
+            dProg = 7;
+        }
+    }
+    private void fadeIn(Canvas c){
+        if(effectTimer > 0){
+            transPaint.setColor(Color.BLACK);
+            transPaint.setAlpha(effectTimer);
+            c.drawRect(0,0,screenX,screenY,transPaint);
+        }
+
+        if(!effectFlag){
+            if(effectTimer - 10 > 0){
+                effectTimer-=10;
+            }else{
+                effectTimer = 0;
+            }
+        }
+        if(effectTimer<=0){
+            effectTimer = 0;
+            effectFlag = true;
+        }
+        if(effectFlag){
+            effectFlag = false;
+        }
+    }
+
     @Override
     public void run() {
         while (playing) {
@@ -192,27 +237,7 @@ public class GameView extends SurfaceView implements Runnable {
                     drawAvailNum(canvas, boardObj.getWord(),Color.WHITE);
                     //drawBoard(canvas, "WAKE",Color.WHITE,Color.BLACK);
 
-
-                    if(effectTimer > 0){
-                        transPaint.setColor(Color.BLACK);
-                        transPaint.setAlpha(effectTimer);
-                        canvas.drawRect(0,0,screenX,screenY,transPaint);
-                    }
-
-                    if(!effectFlag){
-                        if(effectTimer - 10 > 0){
-                            effectTimer-=10;
-                        }else{
-                            effectTimer = 0;
-                        }
-                    }
-                    if(effectTimer<=0){
-                        effectTimer = 0;
-                        effectFlag = true;
-                    }
-                    if(effectFlag){
-                        effectFlag = false;
-                    }
+                    fadeIn(canvas);
 
                     break;
                 case 6:
@@ -262,27 +287,8 @@ public class GameView extends SurfaceView implements Runnable {
                     }
                     */
 
+                    fadeOut(canvas);
 
-                    transPaint.setColor(Color.BLACK);
-                    transPaint.setAlpha(effectTimer);
-                    canvas.drawRect(0,0,screenX,screenY,transPaint);
-
-                    if(!effectFlag){
-                        if(effectTimer + 7 <  255){
-                            effectTimer+=7;
-                        }else{
-                            effectTimer = 255;
-                        }
-                    }
-                    if(effectTimer>=255){
-                       effectTimer = 255;
-                       effectFlag = true;
-                    }
-                    if(effectFlag){
-                        effectFlag = false;
-                        //effectTimer=0;
-                        dProg = 7;
-                    }
                     break;
                 case 4:
                     drawLine(canvas,4);
