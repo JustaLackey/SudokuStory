@@ -31,7 +31,7 @@ public class GameView extends SurfaceView implements Runnable {
 
     private ArrayList<Line> lineList = new ArrayList<Line>();
 
-    private Paint paint, boardPaint, scenePaint, numPaint,transPaint;
+    private Paint paint, boardPaint, scenePaint, numPaint,transPaint, devPaint;
     private Canvas canvas;
     private SurfaceHolder surfaceHolder;
 
@@ -89,6 +89,7 @@ public class GameView extends SurfaceView implements Runnable {
         level = 0;
         surfaceHolder = getHolder();
         paint = new Paint(); boardPaint = new Paint(); scenePaint = new Paint(); numPaint = new Paint();
+        devPaint = new Paint();
         transPaint =new Paint();
         bgColor = Color.BLACK;
         fontColor = Color.WHITE;
@@ -921,6 +922,7 @@ public class GameView extends SurfaceView implements Runnable {
         numPaint.setLetterSpacing((float)0.4);
         numPaint.setTextAlign(Paint.Align.CENTER);
         int fullLength = Math.round(numPaint.measureText(currWord));
+        System.out.println("line 925: "+fullLength);
         int startX = screenX/2 - (fullLength/2);
         int spacer =  (int) Math.round(0.4*bigFont);
         int[] chLength =  new int[currWord.length()];
@@ -933,9 +935,14 @@ public class GameView extends SurfaceView implements Runnable {
             for(int cc = 0; cc<i;cc++){
                 currLength+=chLength[cc];
             }
-            if(touchX > (startX+currLength)-(chLength[i]/2)-(spacer/2)
-                    & touchX < (startX+currLength)+(chLength[i]/2)+(spacer/2)
-                    & touchY > startY - Math.round(bigFont/2) & touchY < startY + Math.round(bigFont/2)
+            /* DEV TOOL - draws select boxes, VERY BUGGY, PRONE TO CRASHING, but that's fine if you can figure out the spacing
+            devPaint.setColor(Color.WHITE);
+            devPaint.setStyle(Paint.Style.STROKE);
+            canvas.drawRect((startX+currLength), startY - bigFont, (startX+currLength)+(chLength[i]), startY + Math.round(bigFont/2), devPaint);
+            */
+            if(touchX > (startX+currLength)
+                    & touchX < (startX+currLength)+(chLength[i])
+                    & touchY > startY - bigFont & touchY < startY + Math.round(bigFont/2)
                     & activeTouch[0] >= 0 & activeTouch[1] >= 0){
                 if(!currBoard[activeTouch[0]][activeTouch[1]].getFixed()){
                     currBoard[activeTouch[0]][activeTouch[1]].setNum(i+1);
