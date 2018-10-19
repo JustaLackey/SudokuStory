@@ -1,11 +1,13 @@
 package com.jhchang.simplesudoku;
 
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.support.v4.content.res.TypedArrayUtils;
+import android.support.v7.app.AlertDialog;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
@@ -18,7 +20,7 @@ import org.apache.commons.lang3.ArrayUtils;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-public class GameView extends SurfaceView implements Runnable {
+public class GameView extends SurfaceView implements Runnable  {
 
 
     volatile boolean playing;
@@ -35,7 +37,7 @@ public class GameView extends SurfaceView implements Runnable {
     private Canvas canvas;
     private SurfaceHolder surfaceHolder;
 
-    private boolean dprogFlag, bsFlag,moveFlag,effectFlag;
+    private boolean dprogFlag, bsFlag,moveFlag,effectFlag,refreshFlag;
     //a screenX holder
     private int screenX, screenY, level, bgColor,fontColor, dProg, currScene, boxSize, boardSelect;
     private String currWord;
@@ -85,7 +87,7 @@ public class GameView extends SurfaceView implements Runnable {
         sceneManager = new SceneManager();
 
         //countMisses = 0;
-        dprogFlag = false; bsFlag = false; moveFlag = false; effectFlag = false;
+        dprogFlag = false; bsFlag = false; moveFlag = false; effectFlag = false; refreshFlag = false;
         level = 0;
         surfaceHolder = getHolder();
         paint = new Paint(); boardPaint = new Paint(); scenePaint = new Paint(); numPaint = new Paint();
@@ -934,10 +936,32 @@ public class GameView extends SurfaceView implements Runnable {
                     currBoard[activeTouch[0]][activeTouch[1]].setNum(0);
                     checkBoard();
                 }
-            }else if(touchX > boxTwo[0] & touchX < boxTwo[0]+boxSize
-                    & touchY > boxTwo[1] & touchY < boxTwo[1]+boxSize){
-                System.out.println("this is the undo button");
             }
+        }
+        if(touchX > boxTwo[0] & touchX < boxTwo[0]+boxSize
+                & touchY > boxTwo[1] & touchY < boxTwo[1]+boxSize
+                & !refreshFlag){
+            refreshFlag = true;
+            //board Reset, this may be a mistake, definitely need a dialog window to pop up ask "are you sure"
+            AlertDialog.Builder builder = new AlertDialog.Builder(context);
+            // Add the buttons
+
+            builder.setMessage("Refresh with new board?");
+            builder.setPositiveButton("Refresh", new DialogInterface.OnClickListener() {
+                public void onClick(DialogInterface dialog, int id) {
+                    dProg = 5;
+                    refreshFlag = false;
+                }
+            });
+            builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                public void onClick(DialogInterface dialog, int id) {
+                    // User cancelled the dialog
+                    refreshFlag = false;
+                }
+            });
+            // Create the AlertDialog
+            AlertDialog dialog = builder.create();
+            dialog.show();
         }
     }
 
