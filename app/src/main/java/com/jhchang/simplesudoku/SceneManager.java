@@ -53,9 +53,9 @@ public class SceneManager {
         currScene = new Scene(0);
         currScene.addLine("Every night you wonder whether you're asleep or dead.", posTop);
         currScene.addLine("Maybe this time you're dead.", posTopMid);
-        currScene.addLine("WAKE", posMid, "none", normText, bigFont,true,0);
+        currScene.addLine("DISMANTLE", posMid, "none", normText, bigFont,true,0);
 
-        currScene.addBoard("WAKE",HARD_BOARD);
+        currScene.addBoard("DISMANTLE",HARD_BOARD);
 
         sceneList.add(currScene);
 

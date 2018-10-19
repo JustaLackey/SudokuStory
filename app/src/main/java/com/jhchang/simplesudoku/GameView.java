@@ -31,7 +31,7 @@ public class GameView extends SurfaceView implements Runnable {
 
     private ArrayList<Line> lineList = new ArrayList<Line>();
 
-    private Paint paint, boardPaint, scenePaint, numPaint,transPaint, devPaint;
+    private Paint paint, boardPaint, scenePaint, numPaint,transPaint, devPaint, toolsPaint;
     private Canvas canvas;
     private SurfaceHolder surfaceHolder;
 
@@ -89,7 +89,7 @@ public class GameView extends SurfaceView implements Runnable {
         level = 0;
         surfaceHolder = getHolder();
         paint = new Paint(); boardPaint = new Paint(); scenePaint = new Paint(); numPaint = new Paint();
-        devPaint = new Paint();
+        devPaint = new Paint(); toolsPaint = new Paint();
         transPaint =new Paint();
         bgColor = Color.BLACK;
         fontColor = Color.WHITE;
@@ -117,7 +117,7 @@ public class GameView extends SurfaceView implements Runnable {
         //figure out how big each square needs to be
         //
         boardNine[0] = Math.round(screenX/2) - (48+boxSize*9)/2;
-        boardNine[1] = Math.round(screenY/2) - (48+boxSize*9)/2;
+        boardNine[1] = Math.round(screenY/2) - (48+boxSize*9)/2 - (boxSize*5)/2;
         boardNine[2] = boardNine[0] + (48+boxSize*9);
         boardNine[3] = boardNine[1] + (48+boxSize*9);
 
@@ -240,6 +240,7 @@ public class GameView extends SurfaceView implements Runnable {
                 case 7:
                     //draw sudoku board
                     drawBoard(canvas, boardObj.getWord(),Color.WHITE,Color.BLACK);
+                    drawTools(canvas);
                     drawAvailNum(canvas, boardObj.getWord(),Color.WHITE);
                     //drawBoard(canvas, "WAKE",Color.WHITE,Color.BLACK);
 
@@ -248,6 +249,7 @@ public class GameView extends SurfaceView implements Runnable {
                 case 6:
                     //draw sudoku board
                     drawBoard(canvas, boardObj.getWord(),Color.WHITE,Color.BLACK);
+                    drawTools(canvas);
                     drawAvailNum(canvas, boardObj.getWord(),Color.WHITE);
                     //drawBoard(canvas, "WAKE",Color.WHITE,Color.BLACK);
 
@@ -372,9 +374,6 @@ public class GameView extends SurfaceView implements Runnable {
                 drawNineBoard(c,msg,priColor,secColor,bCoords);
                 break;
         }
-
-
-
     }
     private void drawNineBoard(Canvas c, String msg, int priColor, int secColor, int[] bCoords){
         int xSpace = 0, ySpace = 0;
@@ -588,6 +587,15 @@ public class GameView extends SurfaceView implements Runnable {
         }
     }
 
+    private void drawTools(Canvas c){
+        int boxSize = 108;
+        int[] boxOne = {Math.round(1*(screenX/3)) - boxSize/2,Math.round(17*(screenY/24))};
+        int[] boxTwo = {Math.round(2*(screenX/3)) - boxSize/2,Math.round(17*(screenY/24))};
+
+        toolsPaint.setColor(Color.WHITE); //you're seriously going to have to fix these colors at some point
+        c.drawRect(boxOne[0],boxOne[1],boxOne[0]+boxSize,boxOne[1]+boxSize,toolsPaint);
+        c.drawRect(boxTwo[0],boxTwo[1],boxTwo[0]+boxSize,boxTwo[1]+boxSize,toolsPaint);
+    }
 
     private void dialogue(Canvas c, String msg, int pos, int timer, String effect, int textSpeed, int fontSize){
         if(fTimer[timer] != -1 & fTimer[timer]>textSpeed & dTimer[timer] < msg.length()){ //THESE FOUR IF STATEMENTS ARE A FUCKING MESS
@@ -914,7 +922,26 @@ public class GameView extends SurfaceView implements Runnable {
         }
     }
 
-    private void selectLoc(int touchX,int touchY){ //REDO THIS WHOLE THING WITH NEW LETTER SPACING
+    private void toolsLoc(int touchX, int touchY){
+        int boxSize = 108;
+        int[] boxOne = {Math.round(1*(screenX/3)) - boxSize/2,Math.round(17*(screenY/24))};
+        int[] boxTwo = {Math.round(2*(screenX/3)) - boxSize/2,Math.round(17*(screenY/24))};
+
+        if(activeTouch[0] > 0 & activeTouch[1] > 0){
+            if(touchX > boxOne[0] & touchX < boxOne[0]+boxSize
+                    & touchY > boxOne[1] & touchY < boxOne[1]+boxSize ){
+                if(!currBoard[activeTouch[0]][activeTouch[1]].getFixed()){
+                    currBoard[activeTouch[0]][activeTouch[1]].setNum(0);
+                    checkBoard();
+                }
+            }else if(touchX > boxTwo[0] & touchX < boxTwo[0]+boxSize
+                    & touchY > boxTwo[1] & touchY < boxTwo[1]+boxSize){
+                System.out.println("this is the undo button");
+            }
+        }
+    }
+
+    private void selectLoc(int touchX,int touchY){
 
         int startY = Math.round(7*screenY/8);
         numPaint.setColor(Color.WHITE);
@@ -1133,8 +1160,10 @@ public class GameView extends SurfaceView implements Runnable {
             int pointerId = motionEvent.getPointerId(index);
             switch(action){
                 case MotionEvent.ACTION_DOWN:
-                    if(touchY > bCoords[3]){
+                    if(touchY > Math.round(7*(screenY/8))){
                         selectLoc(touchX,touchY);
+                    }else if(touchY > bCoords[3]){
+                        toolsLoc(touchX,touchY);
                     }else if(touchY > bCoords[1]){
                         pointerLoc(touchX,touchY);
                     }
@@ -1144,8 +1173,10 @@ public class GameView extends SurfaceView implements Runnable {
                     }
                     break;
                 case MotionEvent.ACTION_MOVE:
-                    if(touchY > bCoords[3]){
+                    if(touchY > Math.round(7*(screenY/8)) - bigFont){ //this is super fucking inelegant
                         selectLoc(touchX,touchY);
+                    }else if(touchY > bCoords[3]){
+                        toolsLoc(touchX,touchY);
                     }else if(touchY > bCoords[1]){
                         pointerLoc(touchX,touchY);
                     }
