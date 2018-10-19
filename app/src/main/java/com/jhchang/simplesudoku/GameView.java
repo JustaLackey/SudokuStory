@@ -98,7 +98,7 @@ public class GameView extends SurfaceView implements Runnable {
         }
         //dProg = 0; //init should be 0
         dProg = -1; // dProg starts at -1. maybe bad idea
-        currScene = 1; //starts at 0, change for starting level
+        currScene = 0; //starts at 0, change for starting level
     }
     private void initValues(){  //This should account for all screen sizes
         //border sizes:
@@ -180,9 +180,11 @@ public class GameView extends SurfaceView implements Runnable {
             effectFlag = true;
         }
         if(effectFlag){
+            System.out.println(dProg);
             effectFlag = false;
             //effectTimer=0;
-            dProg = 7;
+            dProg++;
+            System.out.println(dProg);
         }
     }
     private void fadeIn(Canvas c){
@@ -231,16 +233,24 @@ public class GameView extends SurfaceView implements Runnable {
             //scene get
 
             switch(dProg){
+                case 8:
+                    winState();
+                    break;
                 case 7:
                     //draw sudoku board
                     drawBoard(canvas, boardObj.getWord(),Color.WHITE,Color.BLACK);
                     drawAvailNum(canvas, boardObj.getWord(),Color.WHITE);
                     //drawBoard(canvas, "WAKE",Color.WHITE,Color.BLACK);
 
-                    fadeIn(canvas);
-
+                    fadeOut(canvas);
                     break;
                 case 6:
+                    //draw sudoku board
+                    drawBoard(canvas, boardObj.getWord(),Color.WHITE,Color.BLACK);
+                    drawAvailNum(canvas, boardObj.getWord(),Color.WHITE);
+                    //drawBoard(canvas, "WAKE",Color.WHITE,Color.BLACK);
+
+                    fadeIn(canvas);
 
                     break;
                 case 5:
@@ -1049,7 +1059,7 @@ public class GameView extends SurfaceView implements Runnable {
             }
         }
         if(zeroCount == 0 & errorCount == 0){
-            winState();
+            dProg++; //should advance to case 8
         }
     }
 
@@ -1062,7 +1072,9 @@ public class GameView extends SurfaceView implements Runnable {
                 dTimer[i] = 0;
                 fTimer[i] = 0;
             }
-            dprogFlag = false; bsFlag = false;
+            //RESET ALL VALUES FOR NEW SCENE
+            dprogFlag = false; bsFlag = false; effectFlag = false;
+            effectTimer = 0;
         }
     }
 
@@ -1108,7 +1120,7 @@ public class GameView extends SurfaceView implements Runnable {
                 case MotionEvent.ACTION_UP:
                     break;
             }
-        }else if(dProg == 7){
+        }else if(dProg == 6){ //handles touch events for board
             int index = motionEvent.getActionIndex();
             int action = motionEvent.getActionMasked();
             int pointerId = motionEvent.getPointerId(index);

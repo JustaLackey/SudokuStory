@@ -16,10 +16,10 @@ public class Values {
     private final int posBotMid = 3;
     private final int posBot = 4;
 
-    private final int fasterText = 3;
-    private final int fastText = 6;
-    private final int normText = 24;
-    private final int slowText = 58;
+    private final int fasterText = 2;
+    private final int fastText = 4;
+    private final int normText = 12;
+    private final int slowText = 24;
 
     private final int EASY_BOARD = 0;
     private final int MED_BOARD = 1;

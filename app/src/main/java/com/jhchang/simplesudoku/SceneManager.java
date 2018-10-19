@@ -62,11 +62,10 @@ public class SceneManager {
         //Scene 01
         currScene = new Scene(1);
         currScene.addLine("Your eyes flutter open", posTop);
-        currScene.addLine("You see nothing.", posTopMid);
-        currScene.addLine("There's nothing to see.", posMid);
-        currScene.addLine("DISMANTLE", posBotMid, "none", normText, bigFont,true,0);
+        currScene.addLine("But there's nothing to see.", posTopMid);
+        currScene.addLine("WALK", posMid, "none", normText, bigFont,true,0);
 
-        currScene.addBoard("DISMANTLE",HARD_BOARD);
+        currScene.addBoard("WALK",HARD_BOARD);
 
         sceneList.add(currScene);
 
