@@ -33,13 +33,14 @@ public class GameView extends SurfaceView implements Runnable  {
 
     private ArrayList<Line> lineList = new ArrayList<Line>();
 
-    private Paint paint, boardPaint, scenePaint, numPaint,transPaint, devPaint, toolsPaint;
+    private Paint paint, boardPaint, scenePaint, numPaint,transPaint, devPaint, toolsPaint, defPaint;
     private Canvas canvas;
     private SurfaceHolder surfaceHolder;
 
     private boolean dprogFlag, bsFlag,moveFlag,effectFlag,refreshFlag;
     //a screenX holder
-    private int screenX, screenY, level, bgColor,fontColor, dProg, currScene, boxSize, boardSelect;
+    private int screenX, screenY, level, bgColor,fontColor, dProg, currScene, boxSize, boardSelect,
+    selectStartY, toolStartY;
     private String currWord;
     //int fTimer1, fTimer2, fTimer3, fTimer4, dTimer1, dTimer2, dTimer3, dTimer4;
     private int[] fTimer = new int[5];
@@ -66,11 +67,11 @@ public class GameView extends SurfaceView implements Runnable  {
 
 
     private Values values = new Values();
-    private int smallFont, medFont, bigFont,
+    private int smallFont, medFont, boardFont, bigFont,
             posTop, posTopMid, posMid, posBotMid, posBot,
             fasterText, fastText, normText, slowText,
             EASY_BOARD, MED_BOARD, HARD_BOARD,
-            HIGHLIGHT_COLOR, NEIGHBOR_COLOR,FIXED_COLOR,ERROR_COLOR;
+            HIGHLIGHT_COLOR, NEIGHBOR_COLOR,FIXED_COLOR,ERROR_COLOR,REGULAR_COLOR,FONT_COLOR,BG_COLOR,SELECT_COLOR;
 
     public GameView(Context context, int screenX, int screenY) {
         super(context);
@@ -91,10 +92,9 @@ public class GameView extends SurfaceView implements Runnable  {
         level = 0;
         surfaceHolder = getHolder();
         paint = new Paint(); boardPaint = new Paint(); scenePaint = new Paint(); numPaint = new Paint();
-        devPaint = new Paint(); toolsPaint = new Paint();
-        transPaint =new Paint();
-        bgColor = Color.BLACK;
-        fontColor = Color.WHITE;
+        devPaint = new Paint(); toolsPaint = new Paint(); transPaint = new Paint(); defPaint = new Paint();
+        bgColor = BG_COLOR;
+        fontColor = FONT_COLOR;
         for(int i = 0;i<5;i++){
             fTimer[i] = 0;
             dTimer[i] = 0;
@@ -117,20 +117,31 @@ public class GameView extends SurfaceView implements Runnable  {
             boxSize = 108;  //probably doable, probably better, for now will stick with flat value
         }
         //figure out how big each square needs to be
-        //
+        /*
         boardNine[0] = Math.round(screenX/2) - (48+boxSize*9)/2;
         boardNine[1] = Math.round(screenY/2) - (48+boxSize*9)/2 - (boxSize*5)/2;
         boardNine[2] = boardNine[0] + (48+boxSize*9);
         boardNine[3] = boardNine[1] + (48+boxSize*9);
 
-
         boardFour[0] = Math.round(screenX/2) - (48+boxSize*4)/2;
         boardFour[1] = Math.round(screenY/2) - (48+boxSize*4)/2;
+        boardFour[2] = boardFour[0] + (48+boxSize*4);
+        boardFour[3] = boardFour[1] + (48+boxSize*4);
+        */
+
+        boardNine[0] = Math.round(screenX/2) - (48+boxSize*9)/2;
+        boardNine[1] = 200;
+        boardNine[2] = boardNine[0] + (48+boxSize*9);
+        boardNine[3] = boardNine[1] + (48+boxSize*9);
+
+        boardFour[0] = Math.round(screenX/2) - (48+boxSize*4)/2;
+        boardFour[1] = boardNine[3] - (48+boxSize*4);
         boardFour[2] = boardFour[0] + (48+boxSize*4);
         boardFour[3] = boardFour[1] + (48+boxSize*4);
 
         this.smallFont = values.getSmallFont();
         this.medFont = values.getMedFont();
+        this.boardFont = values.getBoardFont();
         this.bigFont = values.getBigFont();
 
         this.posTop = values.getPosTop();
@@ -148,10 +159,19 @@ public class GameView extends SurfaceView implements Runnable  {
         this.MED_BOARD = values.getMED_BOARD();
         this.HARD_BOARD = values.getHARD_BOARD();
 
+        this.REGULAR_COLOR = values.getREGULAR_COLOR();
         this.HIGHLIGHT_COLOR = values.getHIGHLIGHT_COLOR();
         this.NEIGHBOR_COLOR = values.getNEIGHBOR_COLOR();
         this.FIXED_COLOR = values.getFIXED_COLOR();
         this.ERROR_COLOR = values.getERROR_COLOR();
+
+        this.BG_COLOR = values.getBG_COLOR();
+        this.FONT_COLOR = values.getFONT_COLOR();
+        this.SELECT_COLOR = values.getSELECT_COLOR();
+
+
+        toolStartY = boardNine[3]+64;
+        selectStartY = boardNine[3]+64+108+64+(3*bigFont/4);
     }
     private Cell[][] generateBoard(String msg, int diff){
         int[] square = new int[4]; //input value 0-8, fixed num value 0-1, select value 0-1, highlight value 0-1
@@ -167,7 +187,7 @@ public class GameView extends SurfaceView implements Runnable  {
     }
 
     private void fadeOut(Canvas c){
-        transPaint.setColor(Color.BLACK);
+        transPaint.setColor(bgColor);
         transPaint.setAlpha(effectTimer);
         c.drawRect(0,0,screenX,screenY,transPaint);
 
@@ -192,7 +212,7 @@ public class GameView extends SurfaceView implements Runnable  {
     }
     private void fadeIn(Canvas c){
         if(effectTimer > 0){
-            transPaint.setColor(Color.BLACK);
+            transPaint.setColor(bgColor);
             transPaint.setAlpha(effectTimer);
             c.drawRect(0,0,screenX,screenY,transPaint);
         }
@@ -241,18 +261,20 @@ public class GameView extends SurfaceView implements Runnable  {
                     break;
                 case 7:
                     //draw sudoku board
-                    drawBoard(canvas, boardObj.getWord(),Color.WHITE,Color.BLACK);
+                    drawBoard(canvas, boardObj.getWord(),fontColor,REGULAR_COLOR);
                     drawTools(canvas);
-                    drawAvailNum(canvas, boardObj.getWord(),Color.WHITE);
+                    drawAvailNum(canvas, boardObj.getWord(),SELECT_COLOR);
+                    drawDefinition(canvas, boardObj.getwType(),boardObj.getDefinition());
                     //drawBoard(canvas, "WAKE",Color.WHITE,Color.BLACK);
 
                     fadeOut(canvas);
                     break;
                 case 6:
                     //draw sudoku board
-                    drawBoard(canvas, boardObj.getWord(),Color.WHITE,Color.BLACK);
+                    drawBoard(canvas, boardObj.getWord(),fontColor,REGULAR_COLOR);
                     drawTools(canvas);
-                    drawAvailNum(canvas, boardObj.getWord(),Color.WHITE);
+                    drawAvailNum(canvas, boardObj.getWord(),SELECT_COLOR);
+                    drawDefinition(canvas, boardObj.getwType(),boardObj.getDefinition());
                     //drawBoard(canvas, "WAKE",Color.WHITE,Color.BLACK);
 
                     fadeIn(canvas);
@@ -339,6 +361,7 @@ public class GameView extends SurfaceView implements Runnable  {
     private void drawBoard(Canvas c, String msg, int priColor, int secColor){
         int boardSize = msg.length();
         paint.setColor(priColor);
+        paint.setTextSize(boardFont);
         switch(boardSize){
             case 9:
                 bCoords = boardNine;
@@ -415,15 +438,15 @@ public class GameView extends SurfaceView implements Runnable  {
                 }
                 int hit = 0;
                 boolean fixed = currBoard[x][y].getFixed();
-                if(activeTouch[0]==x & activeTouch[1]==y){
+                if(currBoard[x][y].getFixed()) {
+                    hit = 3;
+                    paint.setColor(FIXED_COLOR);
+                }else if(activeTouch[0]==x & activeTouch[1]==y){
                     hit = 1;
                     paint.setColor(HIGHLIGHT_COLOR);
                 }else if(activeTouch[0]==x || activeTouch[1]==y) {
                     hit = 2;
                     paint.setColor(NEIGHBOR_COLOR);
-                }else if(currBoard[x][y].getFixed()) {
-                    hit = 3;
-                    paint.setColor(FIXED_COLOR);
                 }else{
                     hit = 4;
                     paint.setColor(secColor);
@@ -441,14 +464,13 @@ public class GameView extends SurfaceView implements Runnable  {
                     paint.setColor(priColor);
                     System.out.print("normal color" + priColor);
                 }
-                paint.setTextSize(medFont);
+                paint.setTextSize(boardFont);
                 paint.setTextAlign(Paint.Align.CENTER);
                 int squareVal = currBoard[x][y].getNum();
                 if(squareVal > 0){
                     String tempMsg =  String.valueOf(msg.charAt(squareVal - 1));
-                    c.drawText(tempMsg,tempX+medFont/2,tempY+boxSize,paint);
+                    c.drawText(tempMsg,tempX+bigFont/2 + 4,tempY+(3*boxSize/4),paint);
                 }
-
                 paint.setTextAlign(Paint.Align.LEFT);
             }
         }
@@ -529,15 +551,15 @@ public class GameView extends SurfaceView implements Runnable  {
                 }
                 int hit = 0;
                 boolean fixed = currBoard[x][y].getFixed();
-                if(activeTouch[0]==x & activeTouch[1]==y){
+                if(currBoard[x][y].getFixed()) {
+                    hit = 3;
+                    paint.setColor(FIXED_COLOR);
+                }else if(activeTouch[0]==x & activeTouch[1]==y){
                     hit = 1;
                     paint.setColor(HIGHLIGHT_COLOR);
                 }else if(activeTouch[0]==x || activeTouch[1]==y) {
                     hit = 2;
                     paint.setColor(NEIGHBOR_COLOR);
-                }else if(currBoard[x][y].getFixed()) {
-                    hit = 3;
-                    paint.setColor(FIXED_COLOR);
                 }else{
                     hit = 4;
                     paint.setColor(secColor);
@@ -555,12 +577,12 @@ public class GameView extends SurfaceView implements Runnable  {
                     paint.setColor(priColor);
                     System.out.print("normal color" + priColor);
                 }
-                paint.setTextSize(medFont);
+                paint.setTextSize(boardFont);
                 paint.setTextAlign(Paint.Align.CENTER);
                 int squareVal = currBoard[x][y].getNum();
                 if(squareVal > 0){
                     String tempMsg =  String.valueOf(msg.charAt(squareVal - 1));
-                    c.drawText(tempMsg,tempX+medFont/2,tempY+boxSize,paint);
+                    c.drawText(tempMsg,tempX+bigFont/2 + 2,tempY+(3*boxSize/4),paint);
                 }
 
                 paint.setTextAlign(Paint.Align.LEFT);
@@ -569,14 +591,60 @@ public class GameView extends SurfaceView implements Runnable  {
     }
 
     private void drawAvailNum(Canvas c, String msg, int priColor) {
-        int startY = Math.round(7*screenY/8);
+        int startY = selectStartY;
 
-        numPaint.setColor(Color.WHITE);
+        numPaint.setColor(priColor);
         numPaint.setLetterSpacing((float)0.4);
         numPaint.setTextSize(bigFont);
         numPaint.setTextAlign(Paint.Align.CENTER);
-        int textWidth = Math.round(numPaint.measureText(msg));
         c.drawText(msg,screenX/2,startY,numPaint);
+    }
+    private void drawDefinition(Canvas c, String wType, String defi){
+        int startY = selectStartY+(bigFont/4)+96;
+
+        defPaint.setColor(fontColor);
+        defPaint.setTextSize(medFont);
+
+        //defPaint.setTypeface(Typeface.create(Typeface.DEFAULT, Typeface.ITALIC));
+        defPaint.setTextSkewX(-0.25f);
+        c.drawText(wType,25,startY,defPaint);
+
+        defPaint.setTextSkewX(0);
+        //c.drawText(defi,25,startY+medFont+24,defPaint); //will probably have to account for mutliple lines
+
+
+        int textWidth = Math.round(defPaint.measureText(defi));
+        int lines = Math.round(textWidth / (((screenX-100)*6)/8));
+        ArrayList<String> msgLine = new ArrayList<String>();
+        int start = 0;
+        int target = 0;
+        int cutoff= 0;
+        if(lines > 1){
+            String temp = defi;
+            boolean flag = true;
+            while(flag){
+                if(Math.round(defPaint.measureText(temp)) < (((screenX-100)*6)/8)){
+                    flag = false;
+                }
+                target = Math.round(defi.length()/lines);
+                if(target > temp.length()){
+                    cutoff = temp.length();
+                }else{
+                    cutoff = temp.substring(0,target).lastIndexOf(" ")+1;
+                }
+                msgLine.add(temp.substring(0,cutoff));
+                temp = temp.substring(cutoff);
+            }
+        }
+
+        if(lines <=1){
+            c.drawText(defi,25,startY+medFont+12,defPaint);
+        }else{
+            for(int i=0;i<msgLine.size();i++){
+                String temp = msgLine.get(i);
+                c.drawText(temp, 25,startY+medFont+12+(medFont*i),defPaint);
+            }
+        }
     }
 
     private void drawLine(Canvas c, int num){
@@ -591,10 +659,11 @@ public class GameView extends SurfaceView implements Runnable  {
 
     private void drawTools(Canvas c){
         int boxSize = 108;
-        int[] boxOne = {Math.round(1*(screenX/3)) - boxSize/2,Math.round(17*(screenY/24))};
-        int[] boxTwo = {Math.round(2*(screenX/3)) - boxSize/2,Math.round(17*(screenY/24))};
+        int startY = toolStartY;
+        int[] boxOne = {Math.round(1*(screenX/3)) - boxSize/2,startY};
+        int[] boxTwo = {Math.round(2*(screenX/3)) - boxSize/2,startY};
 
-        toolsPaint.setColor(Color.WHITE); //you're seriously going to have to fix these colors at some point
+        toolsPaint.setColor(fontColor); //you're seriously going to have to fix these colors at some point
         c.drawRect(boxOne[0],boxOne[1],boxOne[0]+boxSize,boxOne[1]+boxSize,toolsPaint);
         c.drawRect(boxTwo[0],boxTwo[1],boxTwo[0]+boxSize,boxTwo[1]+boxSize,toolsPaint);
     }
@@ -926,8 +995,9 @@ public class GameView extends SurfaceView implements Runnable  {
 
     private void toolsLoc(int touchX, int touchY){
         int boxSize = 108;
-        int[] boxOne = {Math.round(1*(screenX/3)) - boxSize/2,Math.round(17*(screenY/24))};
-        int[] boxTwo = {Math.round(2*(screenX/3)) - boxSize/2,Math.round(17*(screenY/24))};
+        int startY = toolStartY;
+        int[] boxOne = {Math.round(1*(screenX/3)) - boxSize/2,startY};
+        int[] boxTwo = {Math.round(2*(screenX/3)) - boxSize/2,startY};
 
         if(activeTouch[0] > 0 & activeTouch[1] > 0){
             if(touchX > boxOne[0] & touchX < boxOne[0]+boxSize
@@ -967,8 +1037,7 @@ public class GameView extends SurfaceView implements Runnable  {
 
     private void selectLoc(int touchX,int touchY){
 
-        int startY = Math.round(7*screenY/8);
-        numPaint.setColor(Color.WHITE);
+        int startY = selectStartY;
         numPaint.setTextSize(bigFont);
         numPaint.setLetterSpacing((float)0.4);
         numPaint.setTextAlign(Paint.Align.CENTER);
@@ -1184,7 +1253,7 @@ public class GameView extends SurfaceView implements Runnable  {
             int pointerId = motionEvent.getPointerId(index);
             switch(action){
                 case MotionEvent.ACTION_DOWN:
-                    if(touchY > Math.round(7*(screenY/8))){
+                    if(touchY >= bCoords[3]+64+108){ //this is sloppy
                         selectLoc(touchX,touchY);
                     }else if(touchY > bCoords[3]){
                         toolsLoc(touchX,touchY);
@@ -1197,7 +1266,7 @@ public class GameView extends SurfaceView implements Runnable  {
                     }
                     break;
                 case MotionEvent.ACTION_MOVE:
-                    if(touchY > Math.round(7*(screenY/8)) - bigFont){ //this is super fucking inelegant
+                    if(touchY >= bCoords[3]+64+108){ //this is super fucking inelegant
                         selectLoc(touchX,touchY);
                     }else if(touchY > bCoords[3]){
                         toolsLoc(touchX,touchY);

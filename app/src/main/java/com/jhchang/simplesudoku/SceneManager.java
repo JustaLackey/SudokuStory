@@ -55,7 +55,7 @@ public class SceneManager {
         currScene.addLine("Maybe this time you're dead.", posTopMid);
         currScene.addLine("DISMANTLE", posMid, "none", normText, bigFont,true,0);
 
-        currScene.addBoard("DISMANTLE",HARD_BOARD);
+        currScene.addBoard("DISMANTLE", "verb", "emerge or cause to emerge from a state of sleep; stop sleeping.", HARD_BOARD);
 
         sceneList.add(currScene);
 
@@ -65,7 +65,7 @@ public class SceneManager {
         currScene.addLine("But there's nothing to see.", posTopMid);
         currScene.addLine("WALK", posMid, "none", normText, bigFont,true,0);
 
-        currScene.addBoard("WALK",HARD_BOARD);
+        currScene.addBoard("WALK", "verb", "move at a regular and fairly slow pace by lifting and setting down each foot in turn",HARD_BOARD);
 
         sceneList.add(currScene);
 

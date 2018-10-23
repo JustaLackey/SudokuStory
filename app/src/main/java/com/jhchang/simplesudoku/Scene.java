@@ -59,10 +59,10 @@ public class Scene {
         return lines;
     }
 
-    public void addBoard(String word, int difficulty){
+    public void addBoard(String word, String wType, String definition, int difficulty){
         int id = boards.size();
         word = word.toUpperCase();
-        Board currBoard = new Board(word,difficulty,id);
+        Board currBoard = new Board(word, wType, definition, difficulty,id);
         boards.add(currBoard);
     }
 

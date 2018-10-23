@@ -7,7 +7,7 @@
     android:paddingLeft="@dimen/activity_horizontal_margin"
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
-    android:background="#ffffff"
+    android:background="#000000"
     tools:context="com.jhchang.simplesudoku.MainActivity">
 
     <Button
@@ -15,8 +15,16 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_centerHorizontal="true"
-        android:layout_centerVertical="true"
         android:text="PLAY"
         tools:text="PLAY" />
+
+    <Button
+        android:id="@+id/buttonInfinite"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/buttonPlay"
+        android:layout_centerHorizontal="true"
+        android:text="INFINITE"
+        tools:text="INFINITE" />
 
 </RelativeLayout>
