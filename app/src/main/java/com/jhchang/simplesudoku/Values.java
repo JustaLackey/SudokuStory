@@ -2,6 +2,8 @@ package com.jhchang.simplesudoku;
 
 import android.graphics.Color;
 
+import java.util.ArrayList;
+
 public class Values {
 
 
@@ -36,9 +38,23 @@ public class Values {
     private final int FONT_COLOR = Color.argb(255, 220,220,220);
     private final int SELECT_COLOR = Color.argb(255,51,98,191);
 
+    private final ArrayList<Board> wordNine = new ArrayList<Board>();
+    private final ArrayList<Board> wordFour = new ArrayList<Board>();
 
     public Values(){
-        
+
+        initWordNine();
+        initWordFour();
+
+    }
+
+    private void initWordNine(){
+        String[][] temp = {
+                {"Word","type","definition"},
+        };
+    }
+    private void initWordFour(){
+
     }
 
     public int getSmallFont() {
