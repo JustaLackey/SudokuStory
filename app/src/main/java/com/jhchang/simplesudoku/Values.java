@@ -17,17 +17,17 @@ public class Values {
     private final int posBotMid = 3;
     private final int posBot = 4;
 
-    private final int fasterText = 2;
-    private final int fastText = 4;
+    private final int fasterText = 1;
+    private final int fastText = 3;
     private final int normText = 12;
-    private final int slowText = 24;
+    private final int slowText = 20;
 
     private final int EASY_BOARD = 0;
     private final int MED_BOARD = 1;
     private final int HARD_BOARD = 2;
 
     private final int HIGHLIGHT_COLOR = Color.argb(255,51,98,191);
-    private final int NEIGHBOR_COLOR = Color.argb(255,60,60,60);
+    private final int NEIGHBOR_COLOR = Color.argb(255,80,80,80);
     private final int FIXED_COLOR = Color.argb(255,24,24,24);
     private final int REGULAR_COLOR = Color.argb(255,40,40,40);
     private final int ERROR_COLOR = Color.argb(255,173,24,24);

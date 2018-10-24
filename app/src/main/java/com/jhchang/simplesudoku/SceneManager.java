@@ -51,23 +51,70 @@ public class SceneManager {
 
         //Scene 00
         currScene = new Scene(0);
-        currScene.addLine("Every night you wonder whether you're asleep or dead.", posTop);
-        currScene.addLine("Maybe this time you're dead.", posTopMid);
-        currScene.addLine("DISMANTLE", posMid, "none", normText, bigFont,true,0);
+        currScene.addLine("Hey... want to learn magic?",posTop);
+        currScene.addLine("It's simple. You just say the word.", posTopMid);
+        currScene.addLine("The word is...", posMid);
+        currScene.addLine("WORD", posBotMid, "none", normText, bigFont,true,0);
 
-        currScene.addBoard("DISMANTLE", "verb", "emerge or cause to emerge from a state of sleep; stop sleeping.", HARD_BOARD);
+        currScene.addBoard("WORD", "noun", "a unit of language", HARD_BOARD);
 
         sceneList.add(currScene);
 
         //Scene 01
         currScene = new Scene(1);
-        currScene.addLine("Your eyes flutter open", posTop);
-        currScene.addLine("But there's nothing to see.", posTopMid);
-        currScene.addLine("WALK", posMid, "none", normText, bigFont,true,0);
+        currScene.addLine("WORD is a very magical word.", posTop);
+        currScene.addLine("I mean it. Really. It's...", posTopMid);
+        currScene.addLine("TRUE", posMid, "none", normText, bigFont,true,0);
 
-        currScene.addBoard("WALK", "verb", "move at a regular and fairly slow pace by lifting and setting down each foot in turn",HARD_BOARD);
+        currScene.addBoard("TRUE", "adjective", "conforming to reality or fact",HARD_BOARD);
 
         sceneList.add(currScene);
+
+        //Scene 02
+        currScene = new Scene(2);
+        currScene.addLine("You don't believe me.",posTop);
+        currScene.addLine("You don't, I can tell. But that's okay.",posTopMid);
+        currScene.addLine("Magic words are everywhere. Magic words are...",posMid);
+        currScene.addLine("UNIVERSAL", posBotMid, "none", normText, bigFont,true,0);
+
+        currScene.addBoard("UNIVERSAL", "adjective", "applicable everywhere or in all cases", MED_BOARD);
+
+        sceneList.add(currScene);
+
+        //Scene 03
+        currScene = new Scene(3);
+        currScene.addLine("And what makes them magical?", posTop);
+        currScene.addLine("Why it's their power to...", posTopMid);
+        currScene.addLine("MAKE", posMid, "none", normText, bigFont,true,0);
+
+        currScene.addBoard("MAKE","verb","to produce; cause to exist or happen",HARD_BOARD);
+
+        sceneList.add(currScene);
+
+        //Scene 04
+        currScene = new Scene(4);
+        currScene.addLine("If I use the word LAKE. A lake is created.", posTop);
+        currScene.addLine("If I say the air is crisp and the water is frozen.", posTopMid);
+        currScene.addLine("If I say the snow crunches beneath your step and your cheeks flush red, then it becomes...",posMid);
+        currScene.addLine("COLD", posBotMid, "none", normText, bigFont,true,0);
+
+        currScene.addBoard("COLD","adjective","having little or no warmth",HARD_BOARD);
+
+        sceneList.add(currScene);
+
+        //Scene 05
+        currScene = new Scene(5);
+        currScene.addLine("Did you remember a moment of winter?", posTop);
+        currScene.addLine("Was there a chill?", posTopMid);
+        currScene.addLine("Did you feel...", posMid);
+        currScene.addLine("SOMETHING", posBotMid, "none", normText, bigFont,true,0);
+
+        currScene.addBoard("SOMETHING,", "noun", "a certain undetermined or unspecified thing", MED_BOARD);
+
+        sceneList.add(currScene);
+
+        //Scene 06
+
 
 
     }
