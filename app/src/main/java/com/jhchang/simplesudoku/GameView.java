@@ -37,10 +37,10 @@ public class GameView extends SurfaceView implements Runnable  {
     private Canvas canvas;
     private SurfaceHolder surfaceHolder;
 
-    private boolean dprogFlag, bsFlag,moveFlag,effectFlag,refreshFlag;
+    private boolean dprogFlag, bsFlag,moveFlag,effectFlag,refreshFlag, winFlag;
     //a screenX holder
     private int screenX, screenY, level, bgColor,fontColor, dProg, currScene, boxSize, boardSelect,
-    selectStartY, toolStartY;
+    selectStartY, toolStartY, winCounter;
     private String currWord;
     //int fTimer1, fTimer2, fTimer3, fTimer4, dTimer1, dTimer2, dTimer3, dTimer4;
     private int[] fTimer = new int[5];
@@ -49,7 +49,7 @@ public class GameView extends SurfaceView implements Runnable  {
     private int[] targetX = new int[9];
     private int[] targetY = new int[9];
     private int[] activeTouch = {-1,-1};
-    private int effectTimer = 0; private int moveTimer = 0;
+    private int effectTimer = 0; private int moveTimer = 0; private int lingerTimer = 0; private int winTimer = 0;
     //context to be used in onTouchEvent to cause the activity transition from GameAvtivity to MainActivity.
     private Context context;
     //board dimensions
@@ -99,6 +99,7 @@ public class GameView extends SurfaceView implements Runnable  {
             fTimer[i] = 0;
             dTimer[i] = 0;
         }
+        winCounter = 0;
         //dProg = 0; //init should be 0
         dProg = -1; // dProg starts at -1. maybe bad idea
         currScene = 0; //starts at 0, change for starting level
@@ -243,6 +244,20 @@ public class GameView extends SurfaceView implements Runnable  {
     }
 
     private void update() {
+        if(winFlag){
+            for(int x = 0; x<winCounter;x++){
+                for(int y = 0;y<winCounter;y++){
+                    currBoard[x][y].setvState(currBoard[x][y].getvState()+1);
+                }
+            }
+            winTimer++;
+            if(winTimer > 5){
+                if(winCounter < currWord.length()){
+                    winCounter++;
+                }
+                winTimer = 0;
+            }
+        }
     }
 
     private void draw() {
@@ -256,10 +271,20 @@ public class GameView extends SurfaceView implements Runnable  {
             //scene get
 
             switch(dProg){
-                case 8:
+                case 10:
                     winState();
                     break;
-                case 7:
+                case 9:
+                    if(lingerTimer < 45){
+                        drawAvailNum(canvas, boardObj.getWord(),FONT_COLOR);
+                    }
+                    lingerTimer++;
+                    if(lingerTimer > 60){
+                        lingerTimer = 0;
+                        dProg++;
+                    }
+                    break;
+                case 8:
                     //draw sudoku board
                     drawBoard(canvas, boardObj.getWord(),fontColor,REGULAR_COLOR);
                     drawTools(canvas);
@@ -268,6 +293,14 @@ public class GameView extends SurfaceView implements Runnable  {
                     //drawBoard(canvas, "WAKE",Color.WHITE,Color.BLACK);
                     fadeOut(canvas);
                     drawAvailNum(canvas, boardObj.getWord(),FONT_COLOR);
+                    break;
+                case 7:
+                    //draw sudoku board
+                    drawBoard(canvas, boardObj.getWord(),fontColor,REGULAR_COLOR);
+                    drawTools(canvas);
+                    drawAvailNum(canvas, boardObj.getWord(),FONT_COLOR);
+                    drawDefinition(canvas, boardObj.getwType(),boardObj.getDefinition());
+                    //drawBoard(canvas, "WAKE",Color.WHITE,Color.BLACK);
 
                     break;
                 case 6:
@@ -439,7 +472,15 @@ public class GameView extends SurfaceView implements Runnable  {
                 }
                 int hit = 0;
                 boolean fixed = currBoard[x][y].getFixed();
-                if(activeTouch[0]==x & activeTouch[1]==y){
+                if(winFlag){
+                    if(currBoard[x][y].getvState() == 0){
+                        paint.setColor(FIXED_COLOR);
+                    }else if(currBoard[x][y].getvState() == 1){
+                        paint.setColor(NEIGHBOR_COLOR);
+                    }else{
+                        paint.setColor(HIGHLIGHT_COLOR);
+                    }
+                }else if(activeTouch[0]==x & activeTouch[1]==y){
                     hit = 1;
                     paint.setColor(HIGHLIGHT_COLOR);
                 }else if(currBoard[x][y].getFixed()) {
@@ -552,7 +593,16 @@ public class GameView extends SurfaceView implements Runnable  {
                 }
                 int hit = 0;
                 boolean fixed = currBoard[x][y].getFixed();
-                if(activeTouch[0]==x & activeTouch[1]==y){
+
+                if(winFlag){
+                    if(currBoard[x][y].getvState() == 0){
+                        paint.setColor(FIXED_COLOR);
+                    }else if(currBoard[x][y].getvState() == 1){
+                        paint.setColor(NEIGHBOR_COLOR);
+                    }else{
+                        paint.setColor(HIGHLIGHT_COLOR);
+                    }
+                }else if(activeTouch[0]==x & activeTouch[1]==y){
                     hit = 1;
                     paint.setColor(HIGHLIGHT_COLOR);
                 }else if(currBoard[x][y].getFixed()) {
@@ -1187,6 +1237,7 @@ public class GameView extends SurfaceView implements Runnable  {
             }
         }
         if(zeroCount == 0 & errorCount == 0){
+            winFlag = true;
             dProg++; //should advance to case 8
         }
     }
@@ -1201,8 +1252,8 @@ public class GameView extends SurfaceView implements Runnable  {
                 fTimer[i] = 0;
             }
             //RESET ALL VALUES FOR NEW SCENE
-            dprogFlag = false; bsFlag = false; effectFlag = false;
-            effectTimer = 0;
+            dprogFlag = false; bsFlag = false; effectFlag = false; winFlag = false;
+            effectTimer = 0; winTimer = 0; lingerTimer = 0; winCounter = 0;
         }
     }
 
@@ -1263,7 +1314,9 @@ public class GameView extends SurfaceView implements Runnable  {
                     }
 
                     if(touchY < 200){ //THIS IS A DEV SKIP, REMOVE LATER
-                        winState();
+                        //winState();
+                        winFlag = true;
+                        dProg++;
                     }
                     break;
                 case MotionEvent.ACTION_MOVE:
@@ -1277,6 +1330,22 @@ public class GameView extends SurfaceView implements Runnable  {
                     break;
 
             }
+        }else if(dProg == 7){ //handles touch events for win board
+            int index = motionEvent.getActionIndex();
+            int action = motionEvent.getActionMasked();
+            int pointerId = motionEvent.getPointerId(index);
+            switch(action){
+                case MotionEvent.ACTION_DOWN:
+                    if(touchX>0 & touchY >0){
+                        dProg++;
+                    }
+                    break;
+                case MotionEvent.ACTION_UP:
+                    break;
+
+
+            }
+
         }
         return true;
     }

@@ -15,7 +15,7 @@ public class Cell
     public enum CellState{EMPTY, CLICKED, RCLICKED, GUESSED, FILLED, HARDSET};
 
     private Sudoku world;
-    private int num, hiddenNum, timer, row, col;
+    private int num, hiddenNum, timer, row, col, vState;
     private boolean fixed,error;
     private ArrayList<Integer> miniNums;
     private CellState state = CellState.EMPTY;
@@ -28,6 +28,7 @@ public class Cell
         miniNums = new ArrayList<Integer>();
         fixed = true;
         error = false;
+        vState = 0;
     }
     public int getNum(){return num;}
     public int getHiddenNum(){return hiddenNum;}
@@ -52,4 +53,7 @@ public class Cell
     public void setError(boolean err){
         error = err;
     }
+
+    public int getvState() { return vState; }
+    public void setvState(int vState) { this.vState = vState; }
 }
