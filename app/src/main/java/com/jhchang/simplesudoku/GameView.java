@@ -266,8 +266,9 @@ public class GameView extends SurfaceView implements Runnable  {
                     drawAvailNum(canvas, boardObj.getWord(),FONT_COLOR);
                     drawDefinition(canvas, boardObj.getwType(),boardObj.getDefinition());
                     //drawBoard(canvas, "WAKE",Color.WHITE,Color.BLACK);
-
                     fadeOut(canvas);
+                    drawAvailNum(canvas, boardObj.getWord(),FONT_COLOR);
+
                     break;
                 case 6:
                     //draw sudoku board
