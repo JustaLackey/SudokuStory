@@ -6,7 +6,7 @@ public class Board {
     private int id;
 
     public Board(String word, String wType, String definition, int difficulty, int id){
-        this.word = word;
+        this.word = word.toUpperCase();
         this.wType = wType;
         this.definition = definition;
         this.difficulty = difficulty;

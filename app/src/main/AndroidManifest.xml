@@ -24,6 +24,10 @@
             android:configChanges="orientation"
             android:screenOrientation="portrait"
             ></activity>
+        <activity android:name=".InfiniteActivity"
+            android:configChanges="orientation"
+            android:screenOrientation="portrait"
+            ></activity>
     </application>
 
 </manifest>

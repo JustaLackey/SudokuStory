@@ -102,7 +102,7 @@ public class GameView extends SurfaceView implements Runnable  {
         winCounter = 0;
         //dProg = 0; //init should be 0
         dProg = -1; // dProg starts at -1. maybe bad idea
-        currScene = 4; //starts at 0, change for starting level
+        currScene = 0; //starts at 0, change for starting level
     }
     private void initValues(){  //This should account for all screen sizes
 

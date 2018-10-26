@@ -31,7 +31,7 @@ public class InfiniteView extends SurfaceView implements Runnable {
     private boolean iprogFlag, bsFlag,moveFlag,effectFlag,refreshFlag, winFlag;
     //a screenX holder
     private int screenX, screenY, level, bgColor,fontColor, iProg, currScene, boxSize, boardSelect,
-            selectStartY, toolStartY, winCounter;
+            selectStartY, toolStartY, winCounter, boardType;
     private String currWord;
     //int fTimer1, fTimer2, fTimer3, fTimer4, dTimer1, dTimer2, dTimer3, dTimer4;
     private int[] fTimer = new int[5];
@@ -95,6 +95,7 @@ public class InfiniteView extends SurfaceView implements Runnable {
         //iProg = 0; //init should be 0
         iProg = -1; // iProg starts at -1. maybe bad idea
         currScene = 4; //starts at 0, change for starting level
+        boardType = 9;
     }
 
     private void initValues(){  //This should account for all screen sizes
@@ -336,6 +337,75 @@ public class InfiniteView extends SurfaceView implements Runnable {
                     iprogFlag = false;
                     break;
                     */
+
+                case 6:
+                    winState();
+                    break;
+                case 5:
+                    if(lingerTimer < 45){
+                        drawAvailNum(canvas, boardObj.getWord(),FONT_COLOR);
+                    }
+                    lingerTimer++;
+                    if(lingerTimer > 60){
+                        lingerTimer = 0;
+                        iProg++;
+                    }
+                    break;
+                case 4:
+                    //draw sudoku board
+                    drawBoard(canvas, boardObj.getWord(),fontColor,REGULAR_COLOR);
+                    drawTools(canvas);
+                    drawAvailNum(canvas, boardObj.getWord(),FONT_COLOR);
+                    drawDefinition(canvas, boardObj.getwType(),boardObj.getDefinition());
+                    //drawBoard(canvas, "WAKE",Color.WHITE,Color.BLACK);
+                    fadeOut(canvas);
+                    drawAvailNum(canvas, boardObj.getWord(),FONT_COLOR);
+                    break;
+                case 3:
+                    //draw sudoku board
+                    drawBoard(canvas, boardObj.getWord(),fontColor,REGULAR_COLOR);
+                    drawTools(canvas);
+                    drawAvailNum(canvas, boardObj.getWord(),FONT_COLOR);
+                    drawDefinition(canvas, boardObj.getwType(),boardObj.getDefinition());
+                    //drawBoard(canvas, "WAKE",Color.WHITE,Color.BLACK);
+
+                    break;
+                case 2:
+                    //draw sudoku board
+                    drawBoard(canvas, boardObj.getWord(),fontColor,REGULAR_COLOR);
+                    drawTools(canvas);
+                    drawAvailNum(canvas, boardObj.getWord(),FONT_COLOR);
+                    drawDefinition(canvas, boardObj.getwType(),boardObj.getDefinition());
+                    //drawBoard(canvas, "WAKE",Color.WHITE,Color.BLACK);
+
+                    fadeIn(canvas);
+                    break;
+                case 1:
+                    if(effectTimer==0){
+                        if(boardType == 4){
+                            boardObj = values.getRandomFourBoard();
+                        }else{
+                            boardObj = values.getRandomNineBoard();
+                        }
+                        //String tempS = boardObj.getWord();
+                        //int diff = boardObj.getDifficulty();
+                        currWord = boardObj.getWord();
+                        currBoard = generateBoard(boardObj.getWord(), boardObj.getDifficulty());
+                        iprogFlag = false;
+                    }
+
+                    drawSingleLine(canvas,"NINE",posTopMid);
+                    drawSingleLine(canvas,"FOUR",posBotMid);
+
+                    fadeOut(canvas);
+                    break;
+                case 0:
+                    drawSingleLine(canvas,"NINE",posTopMid);
+                    drawSingleLine(canvas,"FOUR",posBotMid);
+                    break;
+                case -1:
+                    iProg++;
+                    break;
             }
 
 
@@ -750,6 +820,16 @@ public class InfiniteView extends SurfaceView implements Runnable {
         }
     }
 
+    private void drawSingleLine(Canvas c, String msg, int pos){
+        paint.setLetterSpacing((float)0.4);
+        paint.setColor(fontColor);
+        paint.setTextSize(bigFont);
+        int textWidth = Math.round(paint.measureText(msg));
+        c.drawText(msg,screenX/2-textWidth/2,200+((screenY/4)*pos)-bigFont/2,paint);
+
+
+    }
+
 
     private void control() {
         try {
@@ -1152,59 +1232,36 @@ public class InfiniteView extends SurfaceView implements Runnable {
 
     private void winState(){
         System.out.println("win!");
-        if(currScene < sceneManager.getSceneList().size()){
-            currScene++;
-            iProg = -1;
-            for(int i = 0;i<dTimer.length;i++){
-                dTimer[i] = 0;
-                fTimer[i] = 0;
-            }
-            //RESET ALL VALUES FOR NEW SCENE
-            iprogFlag = false; bsFlag = false; effectFlag = false; winFlag = false;
-            effectTimer = 0; winTimer = 0; lingerTimer = 0; winCounter = 0;
-        }
+        iProg = 0;
+
+        //RESET ALL VALUES FOR NEW SCENE
+        iprogFlag = false; bsFlag = false; effectFlag = false; winFlag = false;
+        effectTimer = 0; winTimer = 0; lingerTimer = 0; winCounter = 0;
     }
     
     @Override
     public boolean onTouchEvent(MotionEvent motionEvent) {
         int touchX = (int) motionEvent.getX();
         int touchY = (int) motionEvent.getY();
-        /*
-        if(iProg < 4){
-            switch (motionEvent.getAction() & MotionEvent.ACTION_MASK) {
-                case MotionEvent.ACTION_DOWN:
-                    break;
-                case MotionEvent.ACTION_UP:
-                    System.out.println("skip");
-                    dTimer[iProg] = lineList.get(iProg).getLine().length();
-                    fTimer[iProg] = 0;
-                    iprogFlag = true;
-                    System.out.println(iProg);
-                    break;
-            }
-        }else if(iProg == 4){
+        if(iProg == 0){
             switch (motionEvent.getAction() & MotionEvent.ACTION_MASK) {
                 case MotionEvent.ACTION_DOWN:
                     //System.out.println("touchY: "+touchY+ " screenY: "+screenY+" bigFont: "+bigFont);
-                    for(int i = 0;i<lineList.size();i++){
-                        if(lineList.get(i).isClickable()){
-                            if(touchY < 200+ (lineList.get(i).getPos() * (screenY/4)) + bigFont
-                                    & touchY > 200+ (lineList.get(i).getPos() * (screenY/4)) - bigFont){
-                                iProg = 5; //edit this make sure it's good
-                                boardSelect = lineList.get(i).getBoardID(); //temp values
-                                currWord = lineList.get(i).getLine();
-                                iprogFlag = false;
-                            }
-                        }
+                    if(touchY < 200+ 1 * (screenY/4) + bigFont
+                            & touchY > 200+ 1 * (screenY/4) - bigFont){
+                        boardType = 9;
+                        iProg++;
+                    }else if(touchY < 200+ 3 * (screenY/4) + bigFont
+                            & touchY > 200+ 3 * (screenY/4) - bigFont) {
+                        boardType = 4;
+                        iProg++;
                     }
                     break;
                 case MotionEvent.ACTION_UP:
                     break;
             }
-        }else if(iProg == 6){ //handles touch events for board
-            int index = motionEvent.getActionIndex();
+        }else if(iProg == 2){ //handles touch events for board
             int action = motionEvent.getActionMasked();
-            int pointerId = motionEvent.getPointerId(index);
             switch(action){
                 case MotionEvent.ACTION_DOWN:
                     if(touchY >= bCoords[3]+64+108){ //this is sloppy
@@ -1232,10 +1289,8 @@ public class InfiniteView extends SurfaceView implements Runnable {
                     break;
 
             }
-        }else if(iProg == 7){ //handles touch events for win board
-            int index = motionEvent.getActionIndex();
+        }else if(iProg == 3){ //handles touch events for win board
             int action = motionEvent.getActionMasked();
-            int pointerId = motionEvent.getPointerId(index);
             switch(action){
                 case MotionEvent.ACTION_DOWN:
                     if(touchX>0 & touchY >0){
@@ -1249,7 +1304,6 @@ public class InfiniteView extends SurfaceView implements Runnable {
             }
 
         }
-        */
         return true;
     }
 

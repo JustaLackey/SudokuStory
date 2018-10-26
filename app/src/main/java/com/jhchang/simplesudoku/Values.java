@@ -1011,6 +1011,14 @@ public class Values {
     }
     private void initWordFour(){
 
+        String[][] fourList = {
+                {}
+        };
+
+        for(int i = 0; i<fourList.length;i++){
+            Board tempB = new Board(fourList[i][0],fourList[i][1],fourList[i][2],1, i);
+            wordNine.add(tempB);
+        }
     }
 
     public int getSmallFont() {
@@ -1091,5 +1099,12 @@ public class Values {
     }
     public ArrayList<Board> getWordFour() {
         return wordFour;
+    }
+
+    public Board getRandomNineBoard(){
+        return wordNine.get((int)Math.random()*wordNine.size());
+    }
+    public Board getRandomFourBoard(){
+        return wordFour.get((int)Math.random()*wordFour.size());
     }
 }
