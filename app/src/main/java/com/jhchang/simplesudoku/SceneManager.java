@@ -109,7 +109,7 @@ public class SceneManager {
         currScene.addLine("Did you feel...", posMid);
         currScene.addLine("SOMETHING", posBotMid, "none", normText, bigFont,true,0);
 
-        currScene.addBoard("SOMETHING,", "noun", "a certain undetermined or unspecified thing", MED_BOARD);
+        currScene.addBoard("SOMETHING", "noun", "a certain undetermined or unspecified thing", MED_BOARD);
 
         sceneList.add(currScene);
 

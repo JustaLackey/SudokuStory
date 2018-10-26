@@ -102,33 +102,15 @@ public class GameView extends SurfaceView implements Runnable  {
         winCounter = 0;
         //dProg = 0; //init should be 0
         dProg = -1; // dProg starts at -1. maybe bad idea
-        currScene = 0; //starts at 0, change for starting level
+        currScene = 4; //starts at 0, change for starting level
     }
     private void initValues(){  //This should account for all screen sizes
-        //border sizes:
-        //outer border, largest = 12
-        //box border, medium = 6
-        //inner border, smallest = 2
-        //4 squares, border length is 34
-        //6 squares, border length is 38
-        //9 squares, border length is 48
+
         if(screenX < 1080){ //change boxsize as appropriately a la media queries
             boxSize = 96;  //maybe better way is to do it percentage based
         }else{             //but then letters need to scale as well
             boxSize = 108;  //probably doable, probably better, for now will stick with flat value
         }
-        //figure out how big each square needs to be
-        /*
-        boardNine[0] = Math.round(screenX/2) - (48+boxSize*9)/2;
-        boardNine[1] = Math.round(screenY/2) - (48+boxSize*9)/2 - (boxSize*5)/2;
-        boardNine[2] = boardNine[0] + (48+boxSize*9);
-        boardNine[3] = boardNine[1] + (48+boxSize*9);
-
-        boardFour[0] = Math.round(screenX/2) - (48+boxSize*4)/2;
-        boardFour[1] = Math.round(screenY/2) - (48+boxSize*4)/2;
-        boardFour[2] = boardFour[0] + (48+boxSize*4);
-        boardFour[3] = boardFour[1] + (48+boxSize*4);
-        */
 
         boardNine[0] = Math.round(screenX/2) - (48+boxSize*9)/2;
         boardNine[1] = 200;
@@ -174,6 +156,7 @@ public class GameView extends SurfaceView implements Runnable  {
         toolStartY = boardNine[3]+64;
         selectStartY = boardNine[3]+64+108+64+(3*bigFont/4);
     }
+
     private Cell[][] generateBoard(String msg, int diff){
         int[] square = new int[4]; //input value 0-8, fixed num value 0-1, select value 0-1, highlight value 0-1
         int boardSize = msg.length();
@@ -251,7 +234,12 @@ public class GameView extends SurfaceView implements Runnable  {
                 }
             }
             winTimer++;
-            if(winTimer > 5){
+            if(currWord.length() == 4 && winTimer > 12){
+                if(winCounter < currWord.length()){
+                    winCounter++;
+                }
+                winTimer = 0;
+            }else if(winTimer > 6){
                 if(winCounter < currWord.length()){
                     winCounter++;
                 }
@@ -317,6 +305,8 @@ public class GameView extends SurfaceView implements Runnable  {
                 case 5:
                     if(effectTimer==0){
                         boardObj = sceneObj.getThisBoard(boardSelect);
+                        String tempS = boardObj.getWord();
+                        int diff = boardObj.getDifficulty();
                         currBoard = generateBoard(boardObj.getWord(), boardObj.getDifficulty());
                         dprogFlag = false;
                     }
@@ -389,9 +379,6 @@ public class GameView extends SurfaceView implements Runnable  {
         }
     }
 
-    /*
-    LOTS OF THE SPACING IS OFF, FIX THIS WHEN YOU GET THE CHANCE
-     */
     private void drawBoard(Canvas c, String msg, int priColor, int secColor){
         int boardSize = msg.length();
         paint.setColor(priColor);
@@ -475,9 +462,7 @@ public class GameView extends SurfaceView implements Runnable  {
                 if(winFlag){
                     if(currBoard[x][y].getvState() == 0){
                         paint.setColor(FIXED_COLOR);
-                    }else if(currBoard[x][y].getvState() == 1){
-                        paint.setColor(NEIGHBOR_COLOR);
-                    }else{
+                    }else {
                         paint.setColor(HIGHLIGHT_COLOR);
                     }
                 }else if(activeTouch[0]==x & activeTouch[1]==y){
@@ -597,9 +582,7 @@ public class GameView extends SurfaceView implements Runnable  {
                 if(winFlag){
                     if(currBoard[x][y].getvState() == 0){
                         paint.setColor(FIXED_COLOR);
-                    }else if(currBoard[x][y].getvState() == 1){
-                        paint.setColor(NEIGHBOR_COLOR);
-                    }else{
+                    } else{
                         paint.setColor(HIGHLIGHT_COLOR);
                     }
                 }else if(activeTouch[0]==x & activeTouch[1]==y){
@@ -1276,7 +1259,7 @@ public class GameView extends SurfaceView implements Runnable  {
         }else if(dProg == 4){
             switch (motionEvent.getAction() & MotionEvent.ACTION_MASK) {
                 case MotionEvent.ACTION_DOWN:
-                    System.out.println("touchY: "+touchY+ " screenY: "+screenY+" bigFont: "+bigFont);
+                    //System.out.println("touchY: "+touchY+ " screenY: "+screenY+" bigFont: "+bigFont);
                     for(int i = 0;i<lineList.size();i++){
                         if(lineList.get(i).isClickable()){
                             if(touchY < 200+ (lineList.get(i).getPos() * (screenY/4)) + bigFont
