@@ -47,7 +47,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
             //the transition from MainActivity to GameActivity
             startActivity(new Intent(MainActivity.this, GameActivity.class));
         }else if(v == buttonInfinite){
-            //the transition from MainActivity to GameActivity
+            //the transition from MainActivity to InfiniteActivity
             startActivity(new Intent(MainActivity.this, InfiniteActivity.class));
         }
 

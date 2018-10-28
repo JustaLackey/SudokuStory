@@ -233,7 +233,7 @@ public class InfiniteView extends SurfaceView implements Runnable {
                     winCounter++;
                 }
                 winTimer = 0;
-            }else if(winTimer > 6){
+            }else if(winTimer > 4){
                 if(winCounter < currWord.length()){
                     winCounter++;
                 }
@@ -253,11 +253,12 @@ public class InfiniteView extends SurfaceView implements Runnable {
             //scene get
 
             switch(iProg){
-                /*
-                case 10:
+
+                case 6:
                     winState();
                     break;
-                case 9:
+                case 5:
+                    /*
                     if(lingerTimer < 45){
                         drawAvailNum(canvas, boardObj.getWord(),FONT_COLOR);
                     }
@@ -266,91 +267,9 @@ public class InfiniteView extends SurfaceView implements Runnable {
                         lingerTimer = 0;
                         iProg++;
                     }
-                    break;
-                case 8:
-                    //draw sudoku board
-                    drawBoard(canvas, boardObj.getWord(),fontColor,REGULAR_COLOR);
-                    drawTools(canvas);
-                    drawAvailNum(canvas, boardObj.getWord(),FONT_COLOR);
-                    drawDefinition(canvas, boardObj.getwType(),boardObj.getDefinition());
-                    //drawBoard(canvas, "WAKE",Color.WHITE,Color.BLACK);
-                    fadeOut(canvas);
-                    drawAvailNum(canvas, boardObj.getWord(),FONT_COLOR);
-                    break;
-                case 7:
-                    //draw sudoku board
-                    drawBoard(canvas, boardObj.getWord(),fontColor,REGULAR_COLOR);
-                    drawTools(canvas);
-                    drawAvailNum(canvas, boardObj.getWord(),FONT_COLOR);
-                    drawDefinition(canvas, boardObj.getwType(),boardObj.getDefinition());
-                    //drawBoard(canvas, "WAKE",Color.WHITE,Color.BLACK);
-
-                    break;
-                case 6:
-                    //draw sudoku board
-                    drawBoard(canvas, boardObj.getWord(),fontColor,REGULAR_COLOR);
-                    drawTools(canvas);
-                    drawAvailNum(canvas, boardObj.getWord(),FONT_COLOR);
-                    drawDefinition(canvas, boardObj.getwType(),boardObj.getDefinition());
-                    //drawBoard(canvas, "WAKE",Color.WHITE,Color.BLACK);
-
-                    fadeIn(canvas);
-
-                    break;
-                case 5:
-                    if(effectTimer==0){
-                        boardObj = sceneObj.getThisBoard(boardSelect);
-                        String tempS = boardObj.getWord();
-                        int diff = boardObj.getDifficulty();
-                        currBoard = generateBoard(boardObj.getWord(), boardObj.getDifficulty());
-                        iprogFlag = false;
-                    }
-
-                    drawLine(canvas, 4);
-                    drawLine(canvas, 3);
-                    drawLine(canvas, 2);
-                    drawLine(canvas, 1);
-                    drawLine(canvas, 0);
-
-                    fadeOut(canvas);
-
-                    break;
-                case 4:
-                    drawLine(canvas,4);
-                case 3:
-                    drawLine(canvas,3);
-                case 2:
-                    drawLine(canvas,2);
-                case 1:
-                    drawLine(canvas,1);
-                case 0:
-                    drawLine(canvas,0);
-                    break;
-                case -1:
-
-                    sceneObj = sceneManager.getScene(currScene);
-                    lineList = sceneObj.getLines();
+                    */
                     iProg++;
                     break;
-
-                case -2: //dev flag? edit this later
-                    iprogFlag = false;
-                    break;
-                    */
-
-                case 6:
-                    winState();
-                    break;
-                case 5:
-                    if(lingerTimer < 45){
-                        drawAvailNum(canvas, boardObj.getWord(),FONT_COLOR);
-                    }
-                    lingerTimer++;
-                    if(lingerTimer > 60){
-                        lingerTimer = 0;
-                        iProg++;
-                    }
-                    break;
                 case 4:
                     //draw sudoku board
                     drawBoard(canvas, boardObj.getWord(),fontColor,REGULAR_COLOR);
@@ -359,7 +278,6 @@ public class InfiniteView extends SurfaceView implements Runnable {
                     drawDefinition(canvas, boardObj.getwType(),boardObj.getDefinition());
                     //drawBoard(canvas, "WAKE",Color.WHITE,Color.BLACK);
                     fadeOut(canvas);
-                    drawAvailNum(canvas, boardObj.getWord(),FONT_COLOR);
                     break;
                 case 3:
                     //draw sudoku board
@@ -394,14 +312,14 @@ public class InfiniteView extends SurfaceView implements Runnable {
                         iprogFlag = false;
                     }
 
-                    drawSingleLine(canvas,"NINE",posTopMid);
-                    drawSingleLine(canvas,"FOUR",posBotMid);
+                    drawSingleLine(canvas,"NINE",bigFont,posTopMid);
+                    drawSingleLine(canvas,"FOUR",bigFont,posMid);
 
                     fadeOut(canvas);
                     break;
                 case 0:
-                    drawSingleLine(canvas,"NINE",posTopMid);
-                    drawSingleLine(canvas,"FOUR",posBotMid);
+                    drawSingleLine(canvas,"NINE",bigFont,posTopMid);
+                    drawSingleLine(canvas,"FOUR",bigFont,posMid);
                     break;
                 case -1:
                     iProg++;
@@ -681,27 +599,30 @@ public class InfiniteView extends SurfaceView implements Runnable {
         //c.drawText(defi,25,startY+medFont+24,defPaint); //will probably have to account for mutliple lines
 
 
-        int textWidth = Math.round(defPaint.measureText(defi));
-        int lines = Math.round(textWidth / (((screenX-100)*6)/8));
+        int textWidth = (int) Math.ceil(defPaint.measureText(defi));
+        int lines = (int) Math.ceil( (double)textWidth / ((double)screenX-48.0));
         ArrayList<String> msgLine = new ArrayList<String>();
         int start = 0;
-        int target = 0;
+        int target = Math.round(screenX/Math.round(defPaint.measureText("c")));
         int cutoff= 0;
         if(lines > 1){
             String temp = defi;
+            int currLength = 0;
+            //int endIndex = 0;
             boolean flag = true;
             while(flag){
-                if(Math.round(defPaint.measureText(temp)) < (((screenX-100)*6)/8)){
-                    flag = false;
-                }
-                target = Math.round(defi.length()/lines);
+                //target = (int) Math.ceil(defi.length()/lines);
                 if(target > temp.length()){
                     cutoff = temp.length();
                 }else{
                     cutoff = temp.substring(0,target).lastIndexOf(" ")+1;
                 }
+                currLength+=cutoff;
                 msgLine.add(temp.substring(0,cutoff));
                 temp = temp.substring(cutoff);
+                if(currLength>=defi.length()){
+                    flag=false;
+                }
             }
         }
 
@@ -712,16 +633,6 @@ public class InfiniteView extends SurfaceView implements Runnable {
                 String temp = msgLine.get(i);
                 c.drawText(temp, 25,startY+medFont+12+(medFont*i),defPaint);
             }
-        }
-    }
-
-    private void drawLine(Canvas c, int num){
-        if(num < lineList.size()){
-            dialogue(c,lineList.get(num).getLine(),
-                    lineList.get(num).getPos(), num,lineList.get(num).getEffect(),
-                    lineList.get(num).getSpeed(), lineList.get(num).getFontSize());
-        }else if(iProg < 4){
-            iProg++;
         }
     }
 
@@ -736,94 +647,14 @@ public class InfiniteView extends SurfaceView implements Runnable {
         c.drawRect(boxTwo[0],boxTwo[1],boxTwo[0]+boxSize,boxTwo[1]+boxSize,toolsPaint);
     }
 
-    private void dialogue(Canvas c, String msg, int pos, int timer, String effect, int textSpeed, int fontSize){
-        if(fTimer[timer] != -1 & fTimer[timer]>textSpeed & dTimer[timer] < msg.length()){ //THESE FOUR IF STATEMENTS ARE A FUCKING MESS
-            fTimer[timer] = 0;                                      //YOU'RE GOING TO HAVE TO CLEAN THIS
-            dTimer[timer]++;
-        }
-        if(dTimer[timer] > msg.length()){
-            dTimer[timer] = msg.length();
-        }
-        if(dTimer[timer] == msg.length() & fTimer[timer]==0){
-            iprogFlag = true;
-        }
-
-        if(iprogFlag){
-            fTimer[timer]=-1;
-            if(iProg < 4){
-                iProg++;
-            }
-            iprogFlag = false;
-        }
-        paint.setColor(fontColor);
-        paint.setTextSize(fontSize);
-        int textWidth = (int) Math.ceil(paint.measureText(msg));
-        int lines = (int) Math.ceil( (double)textWidth / ((double)screenX-48.0));
-        ArrayList<String> msgLine = new ArrayList<String>();
-        int start = 0;
-        int target = 0;
-        int cutoff= 0;
-        if(lines > 1){
-            String temp = msg;
-            boolean flag = true;
-            while(flag){
-                if(Math.ceil(paint.measureText(temp)) < Math.ceil( (double)textWidth / ((double)screenX-48.0))){
-                    flag = false;
-                }
-                target = Math.round(msg.length()/lines);
-                if(target > temp.length()){
-                    cutoff = temp.length();
-                }else{
-                    cutoff = temp.substring(0,target).lastIndexOf(" ")+1;
-                }
-                msgLine.add(temp.substring(0,cutoff));
-                temp = temp.substring(cutoff);
-            }
-        }
-
-        int maxTime = msg.length();
-
-        if(timer>=maxTime){
-            timer = maxTime;
-        }
-        if(lines <=1){
-            if(lineList.get(timer).isClickable()){
-                paint.setLetterSpacing((float)0.4);
-                textWidth = Math.round(paint.measureText(msg));
-                c.drawText(msg.substring(0,dTimer[timer]),screenX/2-textWidth/2,200+((screenY/4)*pos)-fontSize/2,paint);
-                paint.setLetterSpacing(0);
-            }else{
-                c.drawText(msg.substring(0,dTimer[timer]),screenX/2-textWidth/2,200+((screenY/4)*pos)-fontSize/2,paint);
-            }
-
+    private void drawSingleLine(Canvas c, String msg, int fontsize, int pos){
+        if(fontsize == bigFont){
+            paint.setLetterSpacing((float)0.4);
         }else{
-            for(int i=0;i<msgLine.size();i++){
-                String temp = msgLine.get(i);
-                int prevCh = 0;
-                if(i > 0){
-                    for(int x=0;x<i;x++){
-                        prevCh+=msgLine.get(x).length()-1;
-                    }
-                }
-                int tempC = dTimer[timer] - prevCh;
-                if(tempC < 0){
-                    tempC = 0;
-                }else if(tempC > msgLine.get(i).length()){
-                    tempC = msgLine.get(i).length();
-                }
-                textWidth = Math.round(paint.measureText(msgLine.get(i)));
-                c.drawText(temp.substring(0,tempC), screenX/2-textWidth/2,200+((screenY/4)*pos)+(fontSize*i+1),paint);
-            }
+            paint.setLetterSpacing((0));
         }
-        if(dTimer[timer] < msg.length() & fTimer[timer] != -1){
-            fTimer[timer]++;
-        }
-    }
-
-    private void drawSingleLine(Canvas c, String msg, int pos){
-        paint.setLetterSpacing((float)0.4);
         paint.setColor(fontColor);
-        paint.setTextSize(bigFont);
+        paint.setTextSize(fontsize);
         int textWidth = Math.round(paint.measureText(msg));
         c.drawText(msg,screenX/2-textWidth/2,200+((screenY/4)*pos)-bigFont/2,paint);
 
@@ -1247,12 +1078,12 @@ public class InfiniteView extends SurfaceView implements Runnable {
             switch (motionEvent.getAction() & MotionEvent.ACTION_MASK) {
                 case MotionEvent.ACTION_DOWN:
                     //System.out.println("touchY: "+touchY+ " screenY: "+screenY+" bigFont: "+bigFont);
-                    if(touchY < 200+ 1 * (screenY/4) + bigFont
-                            & touchY > 200+ 1 * (screenY/4) - bigFont){
+                    if(touchY < 200+ posTopMid * (screenY/4) + bigFont
+                            & touchY > 200+ posTopMid * (screenY/4) - bigFont){
                         boardType = 9;
                         iProg++;
-                    }else if(touchY < 200+ 3 * (screenY/4) + bigFont
-                            & touchY > 200+ 3 * (screenY/4) - bigFont) {
+                    }else if(touchY < 200+ posMid * (screenY/4) + bigFont
+                            & touchY > 200+ posMid * (screenY/4) - bigFont) {
                         boardType = 4;
                         iProg++;
                     }

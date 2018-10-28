@@ -239,7 +239,7 @@ public class GameView extends SurfaceView implements Runnable  {
                     winCounter++;
                 }
                 winTimer = 0;
-            }else if(winTimer > 6){
+            }else if(winTimer > 4){
                 if(winCounter < currWord.length()){
                     winCounter++;
                 }
@@ -263,6 +263,7 @@ public class GameView extends SurfaceView implements Runnable  {
                     winState();
                     break;
                 case 9:
+                    /*
                     if(lingerTimer < 45){
                         drawAvailNum(canvas, boardObj.getWord(),FONT_COLOR);
                     }
@@ -271,6 +272,8 @@ public class GameView extends SurfaceView implements Runnable  {
                         lingerTimer = 0;
                         dProg++;
                     }
+                    */
+                    dProg++;
                     break;
                 case 8:
                     //draw sudoku board
@@ -280,7 +283,7 @@ public class GameView extends SurfaceView implements Runnable  {
                     drawDefinition(canvas, boardObj.getwType(),boardObj.getDefinition());
                     //drawBoard(canvas, "WAKE",Color.WHITE,Color.BLACK);
                     fadeOut(canvas);
-                    drawAvailNum(canvas, boardObj.getWord(),FONT_COLOR);
+                    //drawAvailNum(canvas, boardObj.getWord(),FONT_COLOR);
                     break;
                 case 7:
                     //draw sudoku board
@@ -647,27 +650,36 @@ public class GameView extends SurfaceView implements Runnable  {
         //c.drawText(defi,25,startY+medFont+24,defPaint); //will probably have to account for mutliple lines
 
 
-        int textWidth = Math.round(defPaint.measureText(defi));
-        int lines = Math.round(textWidth / (((screenX-100)*6)/8));
+
+        int textWidth = (int) Math.ceil(defPaint.measureText(defi));
+        int lines = (int) Math.ceil( (double)textWidth / ((double)screenX-48.0));
         ArrayList<String> msgLine = new ArrayList<String>();
         int start = 0;
-        int target = 0;
+        int target = (int) Math.round((screenX-48)/Math.round(defPaint.measureText("c")));
         int cutoff= 0;
         if(lines > 1){
             String temp = defi;
+            int currLength = 0;
+            //int endIndex = 0;
             boolean flag = true;
             while(flag){
-                if(Math.round(defPaint.measureText(temp)) < (((screenX-100)*6)/8)){
+                /*
+                if(Math.round(defPaint.measureText(temp)) <  ((double)screenX-48.0)){
                     flag = false;
                 }
-                target = Math.round(defi.length()/lines);
+                */
+                //target = (int) Math.ceil(defi.length()/lines);
                 if(target > temp.length()){
                     cutoff = temp.length();
                 }else{
                     cutoff = temp.substring(0,target).lastIndexOf(" ")+1;
                 }
+                currLength+=cutoff;
                 msgLine.add(temp.substring(0,cutoff));
                 temp = temp.substring(cutoff);
+                if(currLength>=defi.length()){
+                    flag=false;
+                }
             }
         }
 
@@ -723,27 +735,36 @@ public class GameView extends SurfaceView implements Runnable  {
         }
         paint.setColor(fontColor);
         paint.setTextSize(fontSize);
+
         int textWidth = (int) Math.ceil(paint.measureText(msg));
         int lines = (int) Math.ceil( (double)textWidth / ((double)screenX-48.0));
         ArrayList<String> msgLine = new ArrayList<String>();
         int start = 0;
-        int target = 0;
+        int target = (int) Math.round((screenX-48)/Math.round(paint.measureText("c")));
         int cutoff= 0;
         if(lines > 1){
             String temp = msg;
+            int currLength = 0;
+            //int endIndex = 0;
             boolean flag = true;
             while(flag){
-                if(Math.ceil(paint.measureText(temp)) < Math.ceil( (double)textWidth / ((double)screenX-48.0))){
+                /*
+                if(Math.round(defPaint.measureText(temp)) <  ((double)screenX-48.0)){
                     flag = false;
                 }
-                target = Math.round(msg.length()/lines);
+                */
+                //target = (int) Math.ceil(defi.length()/lines);
                 if(target > temp.length()){
                     cutoff = temp.length();
                 }else{
                     cutoff = temp.substring(0,target).lastIndexOf(" ")+1;
                 }
+                currLength+=cutoff;
                 msgLine.add(temp.substring(0,cutoff));
                 temp = temp.substring(cutoff);
+                if(currLength>=msg.length()){
+                    flag=false;
+                }
             }
         }
 
@@ -784,37 +805,6 @@ public class GameView extends SurfaceView implements Runnable  {
         if(dTimer[timer] < msg.length() & fTimer[timer] != -1){
             fTimer[timer]++;
         }
-    }
-
-    private void drawMovingLine(Canvas c, int num){
-        String tempLine = lineList.get(num).getLine();
-        int pos = lineList.get(num).getPos();
-        pos = 100+((screenY/4)*pos);
-        int goal = Math.round(7*screenY/8);
-        if(moveTimer+pos+.01 < goal){
-            moveTimer+=pos+.01;
-            moveFlag = false;
-        }else{
-            moveFlag = true;
-            moveTimer = goal;
-        }
-        paint.setLetterSpacing((float)0.4);
-        paint.setTextAlign(Paint.Align.CENTER);
-        c.drawText(tempLine, screenX/2, moveTimer,paint);
-        paint.setTextAlign(Paint.Align.LEFT);
-        paint.setLetterSpacing(0);
-    }
-
-    private void targetCoord(String msg, int startPos){
-        int textWidth = Math.round(paint.measureText(msg));
-        int[] letterWidth;
-        for(int i=0;i<msg.length();i++){
-
-        }
-
-    }
-    private void btnSpread(Canvas c, String msg, int timer, int pos, int fontSize){
-
     }
 
     private void control() {
@@ -1107,28 +1097,6 @@ public class GameView extends SurfaceView implements Runnable  {
 
         }
 
-        /*
-        int spaceX = 24;
-        int letterX = bigFont;
-        int startX = screenX/2 - (letterX*board+spaceX*(board-1))/2;
-        if(startX < 0){ //this shouldn't happen?
-            startX = 24;
-            spaceX = 12;
-        }
-        int startY = Math.round(7*screenY/8);
-        for(int i=0;i<board;i++){
-            if(touchX > startX+letterX*i+spaceX*i-Math.round(bigFont/2) & touchX < startX+letterX*i+spaceX*i+Math.round(bigFont/2)
-                    & touchY > startY - Math.round(bigFont/2) & touchY < startY + Math.round(bigFont/2)
-                    & activeTouch[0] >= 0 & activeTouch[1] >= 0){
-                    if(!currBoard[activeTouch[0]][activeTouch[1]].getFixed()){
-                        currBoard[activeTouch[0]][activeTouch[1]].setNum(i+1);
-                        checkBoard();
-                        break;
-                    }
-            }
-
-        }
-        */
     }
 
     private void checkBoard(){
