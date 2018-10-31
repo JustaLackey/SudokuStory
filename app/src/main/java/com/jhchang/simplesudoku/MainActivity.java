@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
@@ -52,6 +53,22 @@ public class MainActivity extends Activity implements View.OnClickListener {
         }
 
     }
+
+    /*
+    @Override
+    public boolean onTouchEvent(MotionEvent motionEvent) {
+        int touchX = (int)motionEvent.getX();
+        int touchY = (int)motionEvent.getY();
+        switch (motionEvent.getAction() & MotionEvent.ACTION_MASK) {
+            case MotionEvent.ACTION_DOWN:
+                break;
+            case MotionEvent.ACTION_UP:
+                break;
+        }
+
+        return true;
+    }
+    */
     @Override
     public void onBackPressed() {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);

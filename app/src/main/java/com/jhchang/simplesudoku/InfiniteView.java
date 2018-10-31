@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.graphics.Canvas;
 import android.graphics.Paint;
+import android.graphics.drawable.Drawable;
 import android.support.v7.app.AlertDialog;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
@@ -28,7 +29,7 @@ public class InfiniteView extends SurfaceView implements Runnable {
     private Canvas canvas;
     private SurfaceHolder surfaceHolder;
 
-    private boolean iprogFlag, bsFlag,moveFlag,effectFlag,refreshFlag, winFlag;
+    private boolean iprogFlag, bsFlag,moveFlag,effectFlag,refreshFlag, winFlag,resetFlag;
     //a screenX holder
     private int screenX, screenY, level, bgColor,fontColor, iProg, currScene, boxSize, boardSelect,
             selectStartY, toolStartY, winCounter, boardType;
@@ -62,8 +63,11 @@ public class InfiniteView extends SurfaceView implements Runnable {
             posTop, posTopMid, posMid, posBotMid, posBot,
             fasterText, fastText, normText, slowText,
             EASY_BOARD, MED_BOARD, HARD_BOARD,
-            HIGHLIGHT_COLOR, NEIGHBOR_COLOR,FIXED_COLOR,ERROR_COLOR,REGULAR_COLOR,FONT_COLOR,BG_COLOR,SELECT_COLOR;
+            HIGHLIGHT_COLOR, NEIGHBOR_COLOR,FIXED_COLOR,ERROR_COLOR,REGULAR_COLOR,FONT_COLOR,BD_COLOR,BG_COLOR,SELECT_COLOR;
 
+    private Drawable imageEraser;
+    private Drawable imageRefresh;
+    private Drawable imageReset;
 
     public InfiniteView(Context context, int screenX, int screenY) {
         super(context);
@@ -80,7 +84,7 @@ public class InfiniteView extends SurfaceView implements Runnable {
         sceneManager = new SceneManager();
 
         //countMisses = 0;
-        iprogFlag = false; bsFlag = false; moveFlag = false; effectFlag = false; refreshFlag = false;
+        iprogFlag = false; bsFlag = false; moveFlag = false; effectFlag = false; refreshFlag = false; resetFlag = false;
         level = 0;
         surfaceHolder = getHolder();
         paint = new Paint(); boardPaint = new Paint(); scenePaint = new Paint(); numPaint = new Paint();
@@ -142,10 +146,14 @@ public class InfiniteView extends SurfaceView implements Runnable {
         this.FIXED_COLOR = values.getFIXED_COLOR();
         this.ERROR_COLOR = values.getERROR_COLOR();
 
+        this.BD_COLOR = values.getBD_COLOR();
         this.BG_COLOR = values.getBG_COLOR();
         this.FONT_COLOR = values.getFONT_COLOR();
         this.SELECT_COLOR = values.getSELECT_COLOR();
 
+        imageEraser = getResources().getDrawable(R.drawable.eraser_sized);
+        imageRefresh = getResources().getDrawable(R.drawable.refresh_sized);
+        imageReset = getResources().getDrawable(R.drawable.reset_sized);
 
         toolStartY = boardNine[3]+64;
         selectStartY = boardNine[3]+64+108+64+(3*bigFont/4);
@@ -246,7 +254,7 @@ public class InfiniteView extends SurfaceView implements Runnable {
         if (surfaceHolder.getSurface().isValid()) {
             canvas = surfaceHolder.lockCanvas();
 
-            canvas.drawColor(bgColor);
+            canvas.drawColor(BD_COLOR);
 
 
             //this may or may not be a good place to put this
@@ -300,10 +308,14 @@ public class InfiniteView extends SurfaceView implements Runnable {
                     break;
                 case 1:
                     if(effectTimer==0){
-                        if(boardType == 4){
-                            boardObj = values.getRandomFourBoard();
+                        if(resetFlag){
+                            resetFlag = false;
                         }else{
-                            boardObj = values.getRandomNineBoard();
+                            if(boardType == 4){
+                                boardObj = values.getRandomFourBoard();
+                            }else{
+                                boardObj = values.getRandomNineBoard();
+                            }
                         }
                         //String tempS = boardObj.getWord();
                         //int diff = boardObj.getDifficulty();
@@ -351,6 +363,7 @@ public class InfiniteView extends SurfaceView implements Runnable {
         }
         //draw primary background
         c.drawRect(bCoords[0],bCoords[1],bCoords[2],bCoords[3],paint);
+
         //draw individual blocks
         paint.setColor(secColor);
 
@@ -579,10 +592,15 @@ public class InfiniteView extends SurfaceView implements Runnable {
     private void drawAvailNum(Canvas c, String msg, int priColor) {
         int startY = selectStartY;
 
-        numPaint.setColor(priColor);
-        numPaint.setLetterSpacing((float)0.4);
-        numPaint.setTextSize(bigFont);
+
+        //numPaint.setColor(REGULAR_COLOR);
+        //c.drawRect(0,startY-100,screenX,startY+20,numPaint);
+
         numPaint.setTextAlign(Paint.Align.CENTER);
+        numPaint.setLetterSpacing((float)0.5);
+        numPaint.setTextSize(bigFont);
+
+        numPaint.setColor(priColor);
         c.drawText(msg,screenX/2,startY,numPaint);
     }
     private void drawDefinition(Canvas c, String wType, String defi){
@@ -637,19 +655,29 @@ public class InfiniteView extends SurfaceView implements Runnable {
     }
 
     private void drawTools(Canvas c){
-        int boxSize = 108;
+        int boxSize = 80;
         int startY = toolStartY;
         int[] boxOne = {Math.round(1*(screenX/3)) - boxSize/2,startY};
         int[] boxTwo = {Math.round(2*(screenX/3)) - boxSize/2,startY};
+        //int[] boxThree = {Math.round(3*(screenX/4)) - boxSize/2,startY};
 
-        toolsPaint.setColor(fontColor); //you're seriously going to have to fix these colors at some point
-        c.drawRect(boxOne[0],boxOne[1],boxOne[0]+boxSize,boxOne[1]+boxSize,toolsPaint);
-        c.drawRect(boxTwo[0],boxTwo[1],boxTwo[0]+boxSize,boxTwo[1]+boxSize,toolsPaint);
+        toolsPaint.setColor(fontColor);
+
+        //c.drawRect(boxOne[0],boxOne[1],boxOne[0]+boxSize,boxOne[1]+boxSize,toolsPaint);
+        //c.drawRect(boxTwo[0],boxTwo[1],boxTwo[0]+boxSize,boxTwo[1]+boxSize,toolsPaint);
+
+        imageEraser.setBounds(boxOne[0],boxOne[1], boxOne[0]+boxSize,boxOne[1]+boxSize);
+        imageEraser.draw(c);
+        imageReset.setBounds(boxTwo[0],boxTwo[1], boxTwo[0]+boxSize,boxTwo[1]+boxSize);
+        imageReset.draw(c);
+        //imageRefresh.setBounds(boxThree[0],boxThree[1], boxThree[0]+boxSize,boxThree[1]+boxSize);
+        //imageRefresh.draw(c);
+
     }
 
     private void drawSingleLine(Canvas c, String msg, int fontsize, int pos){
         if(fontsize == bigFont){
-            paint.setLetterSpacing((float)0.4);
+            paint.setLetterSpacing((float)0.5);
         }else{
             paint.setLetterSpacing((0));
         }
@@ -864,7 +892,7 @@ public class InfiniteView extends SurfaceView implements Runnable {
     }
 
     private void toolsLoc(int touchX, int touchY){
-        int boxSize = 108;
+        int boxSize = 80;
         int startY = toolStartY;
         int[] boxOne = {Math.round(1*(screenX/3)) - boxSize/2,startY};
         int[] boxTwo = {Math.round(2*(screenX/3)) - boxSize/2,startY};
@@ -889,7 +917,8 @@ public class InfiniteView extends SurfaceView implements Runnable {
             builder.setMessage("Refresh with new board?");
             builder.setPositiveButton("Refresh", new DialogInterface.OnClickListener() {
                 public void onClick(DialogInterface dialog, int id) {
-                    iProg = 5;
+                    iProg = 1;
+                    resetFlag = true;
                     refreshFlag = false;
                 }
             });
@@ -909,12 +938,12 @@ public class InfiniteView extends SurfaceView implements Runnable {
 
         int startY = selectStartY;
         numPaint.setTextSize(bigFont);
-        numPaint.setLetterSpacing((float)0.4);
+        numPaint.setLetterSpacing((float)0.5);
         numPaint.setTextAlign(Paint.Align.CENTER);
         int fullLength = Math.round(numPaint.measureText(currWord));
         System.out.println("line 925: "+fullLength);
         int startX = screenX/2 - (fullLength/2);
-        int spacer =  (int) Math.round(0.4*bigFont);
+        int spacer =  (int) Math.round(0.5*bigFont);
         int[] chLength =  new int[currWord.length()];
         for(int ch = 0; ch<currWord.length();ch++){
             String tempString = Character.toString(currWord.charAt(ch));
@@ -1078,12 +1107,12 @@ public class InfiniteView extends SurfaceView implements Runnable {
             switch (motionEvent.getAction() & MotionEvent.ACTION_MASK) {
                 case MotionEvent.ACTION_DOWN:
                     //System.out.println("touchY: "+touchY+ " screenY: "+screenY+" bigFont: "+bigFont);
-                    if(touchY < 200+ posTopMid * (screenY/4) + bigFont
-                            & touchY > 200+ posTopMid * (screenY/4) - bigFont){
+                    if(touchY < 200+ posTopMid * (screenY/4) + bigFont/2
+                            & touchY > 200+ posTopMid * (screenY/4) - 3*bigFont/2){
                         boardType = 9;
                         iProg++;
-                    }else if(touchY < 200+ posMid * (screenY/4) + bigFont
-                            & touchY > 200+ posMid * (screenY/4) - bigFont) {
+                    }else if(touchY < 200+ posMid * (screenY/4) + bigFont/2
+                            & touchY > 200+ posMid * (screenY/4) - 3*bigFont/2) {
                         boardType = 4;
                         iProg++;
                     }

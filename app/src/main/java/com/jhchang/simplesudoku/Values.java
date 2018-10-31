@@ -30,9 +30,10 @@ public class Values {
     private final int HIGHLIGHT_COLOR = Color.argb(255, 51, 98, 191);
     private final int NEIGHBOR_COLOR = Color.argb(255, 80, 80, 80);
     private final int FIXED_COLOR = Color.argb(255, 24, 24, 24);
-    private final int REGULAR_COLOR = Color.argb(255, 40, 40, 40);
+    private final int REGULAR_COLOR = Color.argb(255, 55, 55, 55);
     private final int ERROR_COLOR = Color.argb(255, 173, 24, 24);
 
+    private final int BD_COLOR = Color.argb(255,17,17,17);
     private final int BG_COLOR = Color.argb(255, 0, 0, 0);
     private final int FONT_COLOR = Color.argb(255, 220, 220, 220);
     private final int SELECT_COLOR = Color.argb(255, 51, 98, 191);
@@ -2814,6 +2815,10 @@ public class Values {
 
     public int getERROR_COLOR() {
         return ERROR_COLOR;
+    }
+
+    public int getBD_COLOR() {
+        return BD_COLOR;
     }
 
     public int getBG_COLOR() {

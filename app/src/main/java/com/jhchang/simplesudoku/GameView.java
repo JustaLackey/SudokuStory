@@ -3,9 +3,12 @@ package com.jhchang.simplesudoku;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.Typeface;
+import android.support.v4.content.res.ResourcesCompat;
 import android.support.v4.content.res.TypedArrayUtils;
 import android.support.v7.app.AlertDialog;
 import android.util.Log;
@@ -19,6 +22,8 @@ import org.apache.commons.lang3.ArrayUtils;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+
+import static android.content.Context.MODE_PRIVATE;
 
 public class GameView extends SurfaceView implements Runnable  {
 
@@ -65,13 +70,19 @@ public class GameView extends SurfaceView implements Runnable  {
     ArrayList<int[]> candList=new ArrayList<int[]>();
     int[] squareSelect = new int[2];
 
+    public static final String STORY_FILE = "SudokuStoryFile";
 
     private Values values = new Values();
+
+
+    private SharedPreferences prefs;
+    private SharedPreferences.Editor editor;
+
     private int smallFont, medFont, boardFont, bigFont,
             posTop, posTopMid, posMid, posBotMid, posBot,
             fasterText, fastText, normText, slowText,
             EASY_BOARD, MED_BOARD, HARD_BOARD,
-            HIGHLIGHT_COLOR, NEIGHBOR_COLOR,FIXED_COLOR,ERROR_COLOR,REGULAR_COLOR,FONT_COLOR,BG_COLOR,SELECT_COLOR;
+            HIGHLIGHT_COLOR, NEIGHBOR_COLOR,FIXED_COLOR,ERROR_COLOR,REGULAR_COLOR,FONT_COLOR,BD_COLOR,BG_COLOR,SELECT_COLOR;
 
     public GameView(Context context, int screenX, int screenY) {
         super(context);
@@ -103,6 +114,16 @@ public class GameView extends SurfaceView implements Runnable  {
         //dProg = 0; //init should be 0
         dProg = -1; // dProg starts at -1. maybe bad idea
         currScene = 0; //starts at 0, change for starting level
+
+
+
+        prefs = context.getSharedPreferences(STORY_FILE, MODE_PRIVATE);
+        editor = prefs.edit();
+        //SharedPreferences prefs = getSharedPreferences(STORY_FILE);
+        currScene = prefs.getInt("currScene",0);
+        //String restoredText = prefs.getString("text", null);
+
+
     }
     private void initValues(){  //This should account for all screen sizes
 
@@ -148,10 +169,19 @@ public class GameView extends SurfaceView implements Runnable  {
         this.FIXED_COLOR = values.getFIXED_COLOR();
         this.ERROR_COLOR = values.getERROR_COLOR();
 
+        this.BD_COLOR = values.getBD_COLOR();
         this.BG_COLOR = values.getBG_COLOR();
         this.FONT_COLOR = values.getFONT_COLOR();
         this.SELECT_COLOR = values.getSELECT_COLOR();
 
+        /*
+        Typeface typeface = getResources().getFont(R.font.times);
+        //Typeface typeface = Typeface.createFromAsset(getContext().getAssets(), "res/font/times.ttf");
+        paint.setTypeface(typeface);
+        defPaint.setTypeface(typeface);
+        numPaint.setTypeface(typeface);
+        scenePaint.setTypeface(typeface);
+        */
 
         toolStartY = boardNine[3]+64;
         selectStartY = boardNine[3]+64+108+64+(3*bigFont/4);
@@ -252,7 +282,7 @@ public class GameView extends SurfaceView implements Runnable  {
         if (surfaceHolder.getSurface().isValid()) {
             canvas = surfaceHolder.lockCanvas();
 
-            canvas.drawColor(bgColor);
+            canvas.drawColor(BD_COLOR);
 
 
             //this may or may not be a good place to put this
@@ -631,7 +661,7 @@ public class GameView extends SurfaceView implements Runnable  {
         int startY = selectStartY;
 
         numPaint.setColor(priColor);
-        numPaint.setLetterSpacing((float)0.4);
+        numPaint.setLetterSpacing((float)0.5);
         numPaint.setTextSize(bigFont);
         numPaint.setTextAlign(Paint.Align.CENTER);
         c.drawText(msg,screenX/2,startY,numPaint);
@@ -775,7 +805,7 @@ public class GameView extends SurfaceView implements Runnable  {
         }
         if(lines <=1){
             if(lineList.get(timer).isClickable()){
-                paint.setLetterSpacing((float)0.4);
+                paint.setLetterSpacing((float)0.5);
                 textWidth = Math.round(paint.measureText(msg));
                 c.drawText(msg.substring(0,dTimer[timer]),screenX/2-textWidth/2,200+((screenY/4)*pos)-fontSize/2,paint);
                 paint.setLetterSpacing(0);
@@ -1063,12 +1093,12 @@ public class GameView extends SurfaceView implements Runnable  {
 
         int startY = selectStartY;
         numPaint.setTextSize(bigFont);
-        numPaint.setLetterSpacing((float)0.4);
+        numPaint.setLetterSpacing((float)0.5);
         numPaint.setTextAlign(Paint.Align.CENTER);
         int fullLength = Math.round(numPaint.measureText(currWord));
         System.out.println("line 925: "+fullLength);
         int startX = screenX/2 - (fullLength/2);
-        int spacer =  (int) Math.round(0.4*bigFont);
+        int spacer =  (int) Math.round(0.5*bigFont);
         int[] chLength =  new int[currWord.length()];
         for(int ch = 0; ch<currWord.length();ch++){
             String tempString = Character.toString(currWord.charAt(ch));
@@ -1197,6 +1227,8 @@ public class GameView extends SurfaceView implements Runnable  {
         System.out.println("win!");
         if(currScene < sceneManager.getSceneList().size()){
             currScene++;
+            editor.putInt("currScene", currScene);
+            editor.apply();
             dProg = -1;
             for(int i = 0;i<dTimer.length;i++){
                 dTimer[i] = 0;
@@ -1230,8 +1262,8 @@ public class GameView extends SurfaceView implements Runnable  {
                     //System.out.println("touchY: "+touchY+ " screenY: "+screenY+" bigFont: "+bigFont);
                     for(int i = 0;i<lineList.size();i++){
                         if(lineList.get(i).isClickable()){
-                            if(touchY < 200+ (lineList.get(i).getPos() * (screenY/4)) + bigFont
-                            & touchY > 200+ (lineList.get(i).getPos() * (screenY/4)) - bigFont){
+                            if(touchY < 200+ (lineList.get(i).getPos() * (screenY/4)) + bigFont/2
+                            & touchY > 200+ (lineList.get(i).getPos() * (screenY/4)) - 3*bigFont/2){
                                 dProg = 5; //edit this make sure it's good
                                 boardSelect = lineList.get(i).getBoardID(); //temp values
                                 currWord = lineList.get(i).getLine();
