@@ -8,6 +8,7 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Typeface;
+import android.graphics.drawable.Drawable;
 import android.support.v4.content.res.ResourcesCompat;
 import android.support.v4.content.res.TypedArrayUtils;
 import android.support.v7.app.AlertDialog;
@@ -83,6 +84,11 @@ public class GameView extends SurfaceView implements Runnable  {
             fasterText, fastText, normText, slowText,
             EASY_BOARD, MED_BOARD, HARD_BOARD,
             HIGHLIGHT_COLOR, NEIGHBOR_COLOR,FIXED_COLOR,ERROR_COLOR,REGULAR_COLOR,FONT_COLOR,BD_COLOR,BG_COLOR,SELECT_COLOR;
+
+
+    private Drawable imageEraser;
+    private Drawable imageRefresh;
+    private Drawable imageReset;
 
     public GameView(Context context, int screenX, int screenY) {
         super(context);
@@ -174,14 +180,9 @@ public class GameView extends SurfaceView implements Runnable  {
         this.FONT_COLOR = values.getFONT_COLOR();
         this.SELECT_COLOR = values.getSELECT_COLOR();
 
-        /*
-        Typeface typeface = getResources().getFont(R.font.times);
-        //Typeface typeface = Typeface.createFromAsset(getContext().getAssets(), "res/font/times.ttf");
-        paint.setTypeface(typeface);
-        defPaint.setTypeface(typeface);
-        numPaint.setTypeface(typeface);
-        scenePaint.setTypeface(typeface);
-        */
+        imageEraser = getResources().getDrawable(R.drawable.eraser_sized);
+        imageRefresh = getResources().getDrawable(R.drawable.refresh_sized);
+        imageReset = getResources().getDrawable(R.drawable.reset_sized);
 
         toolStartY = boardNine[3]+64;
         selectStartY = boardNine[3]+64+108+64+(3*bigFont/4);
@@ -734,14 +735,23 @@ public class GameView extends SurfaceView implements Runnable  {
     }
 
     private void drawTools(Canvas c){
-        int boxSize = 108;
+        int boxSize = 80;
         int startY = toolStartY;
         int[] boxOne = {Math.round(1*(screenX/3)) - boxSize/2,startY};
         int[] boxTwo = {Math.round(2*(screenX/3)) - boxSize/2,startY};
+        //int[] boxThree = {Math.round(3*(screenX/4)) - boxSize/2,startY};
 
-        toolsPaint.setColor(fontColor); //you're seriously going to have to fix these colors at some point
-        c.drawRect(boxOne[0],boxOne[1],boxOne[0]+boxSize,boxOne[1]+boxSize,toolsPaint);
-        c.drawRect(boxTwo[0],boxTwo[1],boxTwo[0]+boxSize,boxTwo[1]+boxSize,toolsPaint);
+        toolsPaint.setColor(fontColor);
+
+        //c.drawRect(boxOne[0],boxOne[1],boxOne[0]+boxSize,boxOne[1]+boxSize,toolsPaint);
+        //c.drawRect(boxTwo[0],boxTwo[1],boxTwo[0]+boxSize,boxTwo[1]+boxSize,toolsPaint);
+
+        imageEraser.setBounds(boxOne[0],boxOne[1], boxOne[0]+boxSize,boxOne[1]+boxSize);
+        imageEraser.draw(c);
+        imageReset.setBounds(boxTwo[0],boxTwo[1], boxTwo[0]+boxSize,boxTwo[1]+boxSize);
+        imageReset.draw(c);
+        //imageRefresh.setBounds(boxThree[0],boxThree[1], boxThree[0]+boxSize,boxThree[1]+boxSize);
+        //imageRefresh.draw(c);
     }
 
     private void dialogue(Canvas c, String msg, int pos, int timer, String effect, int textSpeed, int fontSize){
@@ -1048,7 +1058,7 @@ public class GameView extends SurfaceView implements Runnable  {
     }
 
     private void toolsLoc(int touchX, int touchY){
-        int boxSize = 108;
+        int boxSize = 80;
         int startY = toolStartY;
         int[] boxOne = {Math.round(1*(screenX/3)) - boxSize/2,startY};
         int[] boxTwo = {Math.round(2*(screenX/3)) - boxSize/2,startY};
@@ -1070,7 +1080,7 @@ public class GameView extends SurfaceView implements Runnable  {
             AlertDialog.Builder builder = new AlertDialog.Builder(context);
             // Add the buttons
 
-            builder.setMessage("Refresh with new board?");
+            builder.setMessage("Refresh the board?");
             builder.setPositiveButton("Refresh", new DialogInterface.OnClickListener() {
                 public void onClick(DialogInterface dialog, int id) {
                     dProg = 5;
@@ -1235,7 +1245,7 @@ public class GameView extends SurfaceView implements Runnable  {
                 fTimer[i] = 0;
             }
             //RESET ALL VALUES FOR NEW SCENE
-            dprogFlag = false; bsFlag = false; effectFlag = false; winFlag = false;
+            dprogFlag = false; bsFlag = false; effectFlag = false; winFlag = false; refreshFlag = false;
             effectTimer = 0; winTimer = 0; lingerTimer = 0; winCounter = 0;
         }
     }

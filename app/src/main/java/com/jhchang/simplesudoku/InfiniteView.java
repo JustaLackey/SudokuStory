@@ -914,7 +914,7 @@ public class InfiniteView extends SurfaceView implements Runnable {
             AlertDialog.Builder builder = new AlertDialog.Builder(context);
             // Add the buttons
 
-            builder.setMessage("Refresh with new board?");
+            builder.setMessage("Refresh the board?");
             builder.setPositiveButton("Refresh", new DialogInterface.OnClickListener() {
                 public void onClick(DialogInterface dialog, int id) {
                     iProg = 1;
@@ -1095,7 +1095,7 @@ public class InfiniteView extends SurfaceView implements Runnable {
         iProg = 0;
 
         //RESET ALL VALUES FOR NEW SCENE
-        iprogFlag = false; bsFlag = false; effectFlag = false; winFlag = false;
+        iprogFlag = false; bsFlag = false; effectFlag = false; winFlag = false; refreshFlag = false; resetFlag = false;
         effectTimer = 0; winTimer = 0; lingerTimer = 0; winCounter = 0;
     }
     
