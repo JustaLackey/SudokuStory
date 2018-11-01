@@ -97,7 +97,7 @@ public class SceneManager {
         currScene.addLine("He cannot help but feel a",posMid);
         currScene.addLine("FAKE", posBotMid, "none", normText, bigFont,true,0);
 
-        currScene.addBoard("FAKE","noun","anything made to appear otherwise than it actually is; counterfeit",HARD_BOARD);
+        currScene.addBoard("FAKE","adjective","not true, real, or genuine : counterfeit, sham",HARD_BOARD);
 
         sceneList.add(currScene);
 
@@ -108,7 +108,7 @@ public class SceneManager {
         currScene.addLine("The letters twist and turn, jump from place to place out of order, and lead him around in a", posMid);
         currScene.addLine("LABYRINTH", posBotMid, "none", normText, bigFont,true,0);
 
-        currScene.addBoard("LABYRINTH", "noun", "an intricate combination of paths or passages in which it is difficult to find one's way or to reach the exit", EASY_BOARD);
+        currScene.addBoard("LABYRINTH", "noun", "an intricate combination of paths in which it is difficult to find one's way", EASY_BOARD);
 
         sceneList.add(currScene);
 
@@ -148,7 +148,7 @@ public class SceneManager {
         currScene.addLine("He takes the parchment, wets his lips and when he opens his mouth, out comes",posTopMid);
         currScene.addLine("WIND", posMid, "none", normText, bigFont,true,0);
 
-        currScene.addBoard("WIND", "noun", "air in natural motion, as that moving horizontally at any velocity along the earth's surface", HARD_BOARD);
+        currScene.addBoard("WIND", "noun", "air in natural motion", HARD_BOARD);
         sceneList.add(currScene);
 
         //Scene 10
@@ -227,7 +227,7 @@ public class SceneManager {
         currScene.addLine("Words are",posTopMid);
         currScene.addLine("WIND", posMid, "none", normText, bigFont,true,0);
 
-        currScene.addBoard("WIND", "noun", "air in natural motion, as that moving horizontally at any velocity along the earth's surface", HARD_BOARD);
+        currScene.addBoard("WIND", "noun", "air in natural motion", HARD_BOARD);
         sceneList.add(currScene);
 
         //Scene 18
@@ -330,12 +330,12 @@ public class SceneManager {
         currScene = new Scene(28);
         currScene.addLine("And then once he was ready,",posTop);
         currScene.addLine("Marcus began to",posTopMid);
-        currScene.addLine("WRITE", posMid, "none", normText, bigFont,true,-1);
+        currScene.addLine("WRITE", posMid, "none", slowText, bigFont,true,-1);
         sceneList.add(currScene);
 
         //Scene 29
         currScene = new Scene(29);
-        currScene.addLine("END", posMid, "none", normText, bigFont,true,-1);
+        currScene.addLine("END", posMid, "none", slowText, bigFont,true,-1);
         sceneList.add(currScene);
 
 
