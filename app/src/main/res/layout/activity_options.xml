@@ -9,50 +9,8 @@
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
     android:background="#111111"
-    tools:context="com.jhchang.simplesudoku.MainActivity">
+    tools:context="com.jhchang.simplesudoku.OptionsActivity">
 
-    <Button
-        android:id="@+id/buttonPlay"
-        style="@style/Widget.AppCompat.Button.Borderless"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_centerHorizontal="true"
-        android:layout_centerVertical="true"
-        android:letterSpacing="0.2"
-        android:text="PLAY"
-        android:textColor="@android:color/background_light"
-        android:textSize="30sp"
-        tools:text="STORY" />
-
-    <Button
-        android:id="@+id/buttonInfinite"
-        style="@style/Widget.AppCompat.Button.Borderless"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/buttonPlay"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="10dp"
-        android:letterSpacing="0.2"
-        android:text="INFINITE"
-        android:textAppearance="@android:style/TextAppearance.DeviceDefault.Widget.Button"
-        android:textColor="@android:color/background_light"
-        android:textSize="30sp"
-        tools:text="INFINITE" />
-
-    <Button
-        android:id="@+id/buttonOptions"
-        style="@style/Widget.AppCompat.Button.Borderless"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/buttonInfinite"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="5dp"
-        android:letterSpacing="0.2"
-        android:text="Options"
-        android:textAppearance="@android:style/TextAppearance.DeviceDefault.Widget.Button"
-        android:textColor="@android:color/background_light"
-        android:textSize="20sp"
-        tools:text="Options" />
 
     <ImageView
         android:id="@+id/imageView3"
@@ -64,5 +22,45 @@
         android:adjustViewBounds="true"
         android:src="@drawable/sudoku_story_title" />
 
+    <Button
+        android:id="@+id/buttonReset"
+        style="@style/Widget.AppCompat.Button.Borderless"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_centerVertical="true"
+        android:letterSpacing="0.2"
+        android:text="Reset"
+        android:textColor="@android:color/background_light"
+        android:textSize="30sp"
+        tools:text="Reset Story Progress" />
+    <Button
+        android:id="@+id/buttonEmail"
+        style="@style/Widget.AppCompat.Button.Borderless"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/buttonReset"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="10dp"
+        android:letterSpacing="0.2"
+        android:text="Contact"
+        android:textAppearance="@android:style/TextAppearance.DeviceDefault.Widget.Button"
+        android:textColor="@android:color/background_light"
+        android:textSize="30sp"
+        tools:text="Contact" />
+    <Button
+        android:id="@+id/buttonBack"
+        style="@style/Widget.AppCompat.Button.Borderless"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/buttonEmail"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="5dp"
+        android:letterSpacing="0.2"
+        android:text="Back"
+        android:textAppearance="@android:style/TextAppearance.DeviceDefault.Widget.Button"
+        android:textColor="@android:color/background_light"
+        android:textSize="20sp"
+        tools:text="Back" />
 
 </RelativeLayout>

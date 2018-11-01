@@ -32,7 +32,7 @@ public class InfiniteView extends SurfaceView implements Runnable {
     private boolean iprogFlag, bsFlag,moveFlag,effectFlag,refreshFlag, winFlag,resetFlag;
     //a screenX holder
     private int screenX, screenY, level, bgColor,fontColor, iProg, currScene, boxSize, boardSelect,
-            selectStartY, toolStartY, winCounter, boardType;
+            selectStartY, toolStartY, winCounter, boardType, devSkip;
     private String currWord;
     //int fTimer1, fTimer2, fTimer3, fTimer4, dTimer1, dTimer2, dTimer3, dTimer4;
     private int[] fTimer = new int[5];
@@ -98,8 +98,8 @@ public class InfiniteView extends SurfaceView implements Runnable {
         winCounter = 0;
         //iProg = 0; //init should be 0
         iProg = -1; // iProg starts at -1. maybe bad idea
-        currScene = 4; //starts at 0, change for starting level
-        boardType = 9;
+        currScene = 0; //starts at 0, change for starting level
+        devSkip = 0;
     }
 
     private void initValues(){  //This should account for all screen sizes
@@ -1107,11 +1107,11 @@ public class InfiniteView extends SurfaceView implements Runnable {
             switch (motionEvent.getAction() & MotionEvent.ACTION_MASK) {
                 case MotionEvent.ACTION_DOWN:
                     //System.out.println("touchY: "+touchY+ " screenY: "+screenY+" bigFont: "+bigFont);
-                    if(touchY < 200+ posTopMid * (screenY/4) + bigFont/2
+                    if(touchY < 200+ posTopMid * (screenY/4) + bigFont/4
                             & touchY > 200+ posTopMid * (screenY/4) - 3*bigFont/2){
                         boardType = 9;
                         iProg++;
-                    }else if(touchY < 200+ posMid * (screenY/4) + bigFont/2
+                    }else if(touchY < 200+ posMid * (screenY/4) + bigFont/4
                             & touchY > 200+ posMid * (screenY/4) - 3*bigFont/2) {
                         boardType = 4;
                         iProg++;
@@ -1132,10 +1132,19 @@ public class InfiniteView extends SurfaceView implements Runnable {
                         pointerLoc(touchX,touchY);
                     }
 
-                    if(touchY < 200){ //THIS IS A DEV SKIP, REMOVE LATER
-                        //winState();
-                        winFlag = true;
-                        iProg++;
+                    break;
+                case MotionEvent.ACTION_UP:
+                    if(touchY > screenY - 200
+                            & touchX > screenX/2 - 100
+                            & touchX < screenX/2 + 100){ //THIS IS A DEV SKIP, REMOVE LATER
+                            if(devSkip < 4){
+                                devSkip++;
+                            }else{
+                                devSkip = 0;
+                                //winState();
+                                winFlag = true;
+                                iProg++;
+                            }
                     }
                     break;
                 case MotionEvent.ACTION_MOVE:

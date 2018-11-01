@@ -16,7 +16,7 @@ import android.widget.Button;
 public class MainActivity extends Activity implements View.OnClickListener {
 
     // play image button
-    private Button buttonPlay, buttonInfinite;
+    private Button buttonPlay, buttonInfinite, buttonOptions;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -34,10 +34,12 @@ public class MainActivity extends Activity implements View.OnClickListener {
         //getting the button
         buttonPlay = (Button) findViewById(R.id.buttonPlay);
         buttonInfinite = (Button) findViewById(R.id.buttonInfinite);
+        buttonOptions = (Button) findViewById(R.id.buttonOptions);
 
         //setting the on click listener to play now button
         buttonPlay.setOnClickListener(this);
         buttonInfinite.setOnClickListener(this);
+        buttonOptions.setOnClickListener(this);
     }
 
     // the onclick methods
@@ -50,6 +52,9 @@ public class MainActivity extends Activity implements View.OnClickListener {
         }else if(v == buttonInfinite){
             //the transition from MainActivity to InfiniteActivity
             startActivity(new Intent(MainActivity.this, InfiniteActivity.class));
+        }else if(v == buttonOptions){
+            startActivity(new Intent(MainActivity.this, OptionsActivity.class));
+
         }
 
     }

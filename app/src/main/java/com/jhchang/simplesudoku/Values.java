@@ -2376,7 +2376,6 @@ public class Values {
                 {"lime", "noun", "birdlime"},
                 {"nest", "noun", "a bed or receptacle prepared by an animal and especially a bird for its eggs and young"},
                 {"craw", "noun", "the crop of a bird or insect"},
-                {"crap", "verb", "defecate"},
                 {"lube", "noun", "lubricant"},
                 {"fibs", "noun", "a trivial or childish lie"},
                 {"germ", "noun", "a small mass of living substance capable of developing into an organism or one of its parts"},

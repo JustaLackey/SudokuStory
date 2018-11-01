@@ -1,5 +1,6 @@
 package com.jhchang.simplesudoku;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -39,14 +40,14 @@ public class GameView extends SurfaceView implements Runnable  {
 
     private ArrayList<Line> lineList = new ArrayList<Line>();
 
-    private Paint paint, boardPaint, scenePaint, numPaint,transPaint, devPaint, toolsPaint, defPaint;
+    private Paint paint, boardPaint, scenePaint, numPaint,transPaint, devPaint, toolsPaint, defPaint,skipPaint;
     private Canvas canvas;
     private SurfaceHolder surfaceHolder;
 
-    private boolean dprogFlag, bsFlag,moveFlag,effectFlag,refreshFlag, winFlag;
+    private boolean dprogFlag, bsFlag,moveFlag,effectFlag,refreshFlag, winFlag, skipFlag, victorFlag;
     //a screenX holder
     private int screenX, screenY, level, bgColor,fontColor, dProg, currScene, boxSize, boardSelect,
-    selectStartY, toolStartY, winCounter;
+    selectStartY, toolStartY, winCounter, devSkip;
     private String currWord;
     //int fTimer1, fTimer2, fTimer3, fTimer4, dTimer1, dTimer2, dTimer3, dTimer4;
     private int[] fTimer = new int[5];
@@ -70,6 +71,8 @@ public class GameView extends SurfaceView implements Runnable  {
     private Cell[][] currBoard;
     ArrayList<int[]> candList=new ArrayList<int[]>();
     int[] squareSelect = new int[2];
+
+    private static final int lastScene = 29;
 
     public static final String STORY_FILE = "SudokuStoryFile";
 
@@ -105,11 +108,12 @@ public class GameView extends SurfaceView implements Runnable  {
         sceneManager = new SceneManager();
 
         //countMisses = 0;
-        dprogFlag = false; bsFlag = false; moveFlag = false; effectFlag = false; refreshFlag = false;
+        dprogFlag = false; bsFlag = false; moveFlag = false; effectFlag = false; refreshFlag = false; skipFlag = false;
         level = 0;
         surfaceHolder = getHolder();
         paint = new Paint(); boardPaint = new Paint(); scenePaint = new Paint(); numPaint = new Paint();
         devPaint = new Paint(); toolsPaint = new Paint(); transPaint = new Paint(); defPaint = new Paint();
+        skipPaint = new Paint();
         bgColor = BG_COLOR;
         fontColor = FONT_COLOR;
         for(int i = 0;i<5;i++){
@@ -127,7 +131,9 @@ public class GameView extends SurfaceView implements Runnable  {
         editor = prefs.edit();
         //SharedPreferences prefs = getSharedPreferences(STORY_FILE);
         currScene = prefs.getInt("currScene",0);
-        //String restoredText = prefs.getString("text", null);
+        victorFlag = prefs.getBoolean("victorFlag", false);
+        //victorFlag = true;
+        devSkip = 0;
 
 
     }
@@ -218,11 +224,13 @@ public class GameView extends SurfaceView implements Runnable  {
             effectFlag = true;
         }
         if(effectFlag){
-            System.out.println(dProg);
-            effectFlag = false;
-            //effectTimer=0;
-            dProg++;
-            System.out.println(dProg);
+            if(skipFlag){
+                winState();
+            }else{
+                effectFlag = false;
+                //effectTimer=0;
+                dProg++;
+            }
         }
     }
     private void fadeIn(Canvas c){
@@ -332,12 +340,15 @@ public class GameView extends SurfaceView implements Runnable  {
                     drawAvailNum(canvas, boardObj.getWord(),FONT_COLOR);
                     drawDefinition(canvas, boardObj.getwType(),boardObj.getDefinition());
                     //drawBoard(canvas, "WAKE",Color.WHITE,Color.BLACK);
+                    if(victorFlag){
+                        drawSkip(canvas);
+                    }
 
                     fadeIn(canvas);
 
                     break;
                 case 5:
-                    if(effectTimer==0){
+                    if(effectTimer==0 & !skipFlag){
                         boardObj = sceneObj.getThisBoard(boardSelect);
                         String tempS = boardObj.getWord();
                         int diff = boardObj.getDifficulty();
@@ -350,37 +361,6 @@ public class GameView extends SurfaceView implements Runnable  {
                     drawLine(canvas, 2);
                     drawLine(canvas, 1);
                     drawLine(canvas, 0);
-
-                    /* tried to implement moving line effect, it's fucked, fuck it fuck fuck
-                    int clicked = 0;
-                    for(int i = 0;i<lineList.size();i++){
-                        drawLine(canvas, i);
-                        if(lineList.get(i).getLine() == boardObj.getWord()){
-                            clicked = i;
-                        }
-                    }
-
-                    transPaint.setColor(Color.BLACK);
-                    transPaint.setAlpha(effectTimer);
-                    canvas.drawRect(0,0,screenX,screenY,transPaint);
-
-
-                    drawMovingLine(canvas,clicked);
-
-                    if(!effectFlag){
-                        effectTimer+=5;
-                    }
-
-                    if(effectTimer>=255){
-                        effectFlag = true;
-                    }
-                    if(effectFlag & moveFlag){
-                        effectFlag = false;
-                        moveFlag = false;
-                        effectTimer=0;
-                        dProg = 7;
-                    }
-                    */
 
                     fadeOut(canvas);
 
@@ -721,6 +701,15 @@ public class GameView extends SurfaceView implements Runnable  {
                 String temp = msgLine.get(i);
                 c.drawText(temp, 25,startY+medFont+12+(medFont*i),defPaint);
             }
+        }
+    }
+
+    private void drawSkip(Canvas c){
+        skipPaint.setColor(fontColor);
+        int[] startCoord = {screenX/2 - 50, screenY-150};
+        int startHeight = 100;
+        for(int x = 0;x<24;x++){
+            c.drawRect(startCoord[0]+(x*4),startCoord[1]+(x*2),startCoord[0]+(x*4)+4,startCoord[1]+(x*2)+100-(x*4),skipPaint);
         }
     }
 
@@ -1235,19 +1224,23 @@ public class GameView extends SurfaceView implements Runnable  {
 
     private void winState(){
         System.out.println("win!");
-        if(currScene < sceneManager.getSceneList().size()){
+        if(currScene < sceneManager.getSceneList().size()-1){
             currScene++;
-            editor.putInt("currScene", currScene);
+        }else{
+            currScene = 0;
+            editor.putBoolean("victorFlag", true);
             editor.apply();
-            dProg = -1;
-            for(int i = 0;i<dTimer.length;i++){
-                dTimer[i] = 0;
-                fTimer[i] = 0;
-            }
-            //RESET ALL VALUES FOR NEW SCENE
-            dprogFlag = false; bsFlag = false; effectFlag = false; winFlag = false; refreshFlag = false;
-            effectTimer = 0; winTimer = 0; lingerTimer = 0; winCounter = 0;
         }
+        editor.putInt("currScene", currScene);
+        editor.apply();
+        dProg = -1;
+        for(int i = 0;i<dTimer.length;i++){
+            dTimer[i] = 0;
+            fTimer[i] = 0;
+        }
+        //RESET ALL VALUES FOR NEW SCENE
+        dprogFlag = false; bsFlag = false; effectFlag = false; winFlag = false; refreshFlag = false; skipFlag = false;
+        effectTimer = 0; winTimer = 0; lingerTimer = 0; winCounter = 0;
     }
 
     @Override
@@ -1272,12 +1265,18 @@ public class GameView extends SurfaceView implements Runnable  {
                     //System.out.println("touchY: "+touchY+ " screenY: "+screenY+" bigFont: "+bigFont);
                     for(int i = 0;i<lineList.size();i++){
                         if(lineList.get(i).isClickable()){
-                            if(touchY < 200+ (lineList.get(i).getPos() * (screenY/4)) + bigFont/2
+                            if(touchY < 200+ (lineList.get(i).getPos() * (screenY/4)) + bigFont/4
                             & touchY > 200+ (lineList.get(i).getPos() * (screenY/4)) - 3*bigFont/2){
-                                dProg = 5; //edit this make sure it's good
+
                                 boardSelect = lineList.get(i).getBoardID(); //temp values
-                                currWord = lineList.get(i).getLine();
                                 dprogFlag = false;
+                                if(boardSelect >= 0) {
+                                    dProg = 5; //edit this make sure it's good
+                                    currWord = lineList.get(i).getLine();
+                                }else{
+                                    skipFlag = true;
+                                    dProg = 5;
+                                }
                             }
                         }
                     }
@@ -1305,11 +1304,24 @@ public class GameView extends SurfaceView implements Runnable  {
                     }else if(touchY > bCoords[1]){
                         pointerLoc(touchX,touchY);
                     }
-
-                    if(touchY < 200){ //THIS IS A DEV SKIP, REMOVE LATER
-                        //winState();
-                        winFlag = true;
-                        dProg++;
+                    break;
+                case MotionEvent.ACTION_UP:
+                    if(touchY > screenY - 200
+                            & touchX > screenX/2 - 100
+                            & touchX < screenX/2 + 100){ //THIS IS A DEV SKIP, REMOVE LATER
+                        if(victorFlag){
+                            winFlag = true;
+                            dProg++;
+                        }else{
+                            if(devSkip < 4){
+                                devSkip++;
+                            }else{
+                                devSkip = 0;
+                                //winState();
+                                winFlag = true;
+                                dProg++;
+                            }
+                        }
                     }
                     break;
                 case MotionEvent.ACTION_MOVE:
