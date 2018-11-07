@@ -262,10 +262,10 @@ public class InfiniteView extends SurfaceView implements Runnable {
 
             switch(iProg){
 
-                case 6:
+                case 7:
                     winState();
                     break;
-                case 5:
+                case 6:
                     /*
                     if(lingerTimer < 45){
                         drawAvailNum(canvas, boardObj.getWord(),FONT_COLOR);
@@ -278,7 +278,7 @@ public class InfiniteView extends SurfaceView implements Runnable {
                     */
                     iProg++;
                     break;
-                case 4:
+                case 5:
                     //draw sudoku board
                     drawBoard(canvas, boardObj.getWord(),fontColor,REGULAR_COLOR);
                     drawTools(canvas);
@@ -286,6 +286,15 @@ public class InfiniteView extends SurfaceView implements Runnable {
                     drawDefinition(canvas, boardObj.getwType(),boardObj.getDefinition());
                     //drawBoard(canvas, "WAKE",Color.WHITE,Color.BLACK);
                     fadeOut(canvas);
+                    break;
+                case 4:
+                    //draw sudoku board
+                    drawBoard(canvas, boardObj.getWord(),fontColor,REGULAR_COLOR);
+                    drawTools(canvas);
+                    drawAvailNum(canvas, boardObj.getWord(),FONT_COLOR);
+                    drawDefinition(canvas, boardObj.getwType(),boardObj.getDefinition());
+                    //drawBoard(canvas, "WAKE",Color.WHITE,Color.BLACK);
+
                     break;
                 case 3:
                     //draw sudoku board
@@ -295,18 +304,27 @@ public class InfiniteView extends SurfaceView implements Runnable {
                     drawDefinition(canvas, boardObj.getwType(),boardObj.getDefinition());
                     //drawBoard(canvas, "WAKE",Color.WHITE,Color.BLACK);
 
-                    break;
-                case 2:
-                    //draw sudoku board
-                    drawBoard(canvas, boardObj.getWord(),fontColor,REGULAR_COLOR);
-                    drawTools(canvas);
-                    drawAvailNum(canvas, boardObj.getWord(),FONT_COLOR);
-                    drawDefinition(canvas, boardObj.getwType(),boardObj.getDefinition());
-                    //drawBoard(canvas, "WAKE",Color.WHITE,Color.BLACK);
-
                     fadeIn(canvas);
                     break;
+                case 2:
+                    if(resetFlag){
+                        resetFlag = false;
+                    }else{
+                        if(boardType == 4){
+                            boardObj = values.getRandomFourBoard();
+                        }else{
+                            boardObj = values.getRandomNineBoard();
+                        }
+                    }
+                    //String tempS = boardObj.getWord();
+                    //int diff = boardObj.getDifficulty();
+                    currWord = boardObj.getWord();
+                    currBoard = generateBoard(boardObj.getWord(), boardObj.getDifficulty());
+                    iprogFlag = false;
+                    iProg++;
+                    break;
                 case 1:
+                    /*
                     if(effectTimer==0){
                         if(resetFlag){
                             resetFlag = false;
@@ -323,6 +341,7 @@ public class InfiniteView extends SurfaceView implements Runnable {
                         currBoard = generateBoard(boardObj.getWord(), boardObj.getDifficulty());
                         iprogFlag = false;
                     }
+                    */
 
                     drawSingleLine(canvas,"NINE",bigFont,posTopMid);
                     drawSingleLine(canvas,"FOUR",bigFont,posMid);
@@ -1092,7 +1111,7 @@ public class InfiniteView extends SurfaceView implements Runnable {
 
     private void winState(){
         System.out.println("win!");
-        iProg = 0;
+        iProg = 2;
 
         //RESET ALL VALUES FOR NEW SCENE
         iprogFlag = false; bsFlag = false; effectFlag = false; winFlag = false; refreshFlag = false; resetFlag = false;
@@ -1120,7 +1139,7 @@ public class InfiniteView extends SurfaceView implements Runnable {
                 case MotionEvent.ACTION_UP:
                     break;
             }
-        }else if(iProg == 2){ //handles touch events for board
+        }else if(iProg == 3){ //handles touch events for board
             int action = motionEvent.getActionMasked();
             switch(action){
                 case MotionEvent.ACTION_DOWN:
@@ -1158,7 +1177,7 @@ public class InfiniteView extends SurfaceView implements Runnable {
                     break;
 
             }
-        }else if(iProg == 3){ //handles touch events for win board
+        }else if(iProg == 4){ //handles touch events for win board
             int action = motionEvent.getActionMasked();
             switch(action){
                 case MotionEvent.ACTION_DOWN:
