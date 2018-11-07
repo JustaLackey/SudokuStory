@@ -146,7 +146,7 @@ public class GameView extends SurfaceView implements Runnable  {
         }
 
         boardNine[0] = Math.round(screenX/2) - (48+boxSize*9)/2;
-        boardNine[1] = 200;
+        boardNine[1] = 100;
         boardNine[2] = boardNine[0] + (48+boxSize*9);
         boardNine[3] = boardNine[1] + (48+boxSize*9);
 

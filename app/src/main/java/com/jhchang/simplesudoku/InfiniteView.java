@@ -111,7 +111,7 @@ public class InfiniteView extends SurfaceView implements Runnable {
         }
 
         boardNine[0] = Math.round(screenX/2) - (48+boxSize*9)/2;
-        boardNine[1] = 200;
+        boardNine[1] = 100;
         boardNine[2] = boardNine[0] + (48+boxSize*9);
         boardNine[3] = boardNine[1] + (48+boxSize*9);
 
@@ -936,7 +936,7 @@ public class InfiniteView extends SurfaceView implements Runnable {
             builder.setMessage("Refresh the board?");
             builder.setPositiveButton("Refresh", new DialogInterface.OnClickListener() {
                 public void onClick(DialogInterface dialog, int id) {
-                    iProg = 1;
+                    iProg = 2;
                     resetFlag = true;
                     refreshFlag = false;
                 }
