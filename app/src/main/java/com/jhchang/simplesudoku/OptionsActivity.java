@@ -81,7 +81,7 @@ public class OptionsActivity extends Activity implements View.OnClickListener {
 
             /* Fill it with Data */
             emailIntent.setType("plain/text");
-            emailIntent.putExtra(android.content.Intent.EXTRA_EMAIL, new String[]{"discenereet@gmail.com"});
+            emailIntent.putExtra(android.content.Intent.EXTRA_EMAIL, new String[]{"JustaDevStudio@gmail.com"});
             emailIntent.putExtra(android.content.Intent.EXTRA_SUBJECT, "Re: Sudoku Story");
             //emailIntent.putExtra(android.content.Intent.EXTRA_TEXT, "");
 
