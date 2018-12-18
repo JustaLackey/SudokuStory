@@ -915,11 +915,15 @@ public class InfiniteView extends SurfaceView implements Runnable {
         int startY = toolStartY;
         int[] boxOne = {Math.round(1*(screenX/3)) - boxSize/2,startY};
         int[] boxTwo = {Math.round(2*(screenX/3)) - boxSize/2,startY};
+        System.out.println("enter tools loc");
 
-        if(activeTouch[0] > 0 & activeTouch[1] > 0){
+        if(activeTouch[0] >= 0 & activeTouch[1] >= 0){
+            System.out.println("check active touch");
             if(touchX > boxOne[0] & touchX < boxOne[0]+boxSize
                     & touchY > boxOne[1] & touchY < boxOne[1]+boxSize ){
+                System.out.println("delete is clicked");
                 if(!currBoard[activeTouch[0]][activeTouch[1]].getFixed()){
+                    System.out.println("delete loc");
                     currBoard[activeTouch[0]][activeTouch[1]].setNum(0);
                     checkBoard();
                 }
@@ -929,7 +933,7 @@ public class InfiniteView extends SurfaceView implements Runnable {
                 & touchY > boxTwo[1] & touchY < boxTwo[1]+boxSize
                 & !refreshFlag){
             refreshFlag = true;
-            //board Reset, this may be a mistake, definitely need a dialog window to pop up ask "are you sure"
+            //board Reset
             AlertDialog.Builder builder = new AlertDialog.Builder(context);
             // Add the buttons
 

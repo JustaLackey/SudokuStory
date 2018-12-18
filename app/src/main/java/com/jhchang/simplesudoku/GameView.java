@@ -1052,7 +1052,7 @@ public class GameView extends SurfaceView implements Runnable  {
         int[] boxOne = {Math.round(1*(screenX/3)) - boxSize/2,startY};
         int[] boxTwo = {Math.round(2*(screenX/3)) - boxSize/2,startY};
 
-        if(activeTouch[0] > 0 & activeTouch[1] > 0){
+        if(activeTouch[0] >= 0 & activeTouch[1] >= 0){
             if(touchX > boxOne[0] & touchX < boxOne[0]+boxSize
                     & touchY > boxOne[1] & touchY < boxOne[1]+boxSize ){
                 if(!currBoard[activeTouch[0]][activeTouch[1]].getFixed()){
